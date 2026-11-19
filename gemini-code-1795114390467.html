@@ -1,0 +1,3001 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Kizuna // Campus Tokio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,400;1,600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-pure: #000000;
+      --bg-elevated: #0d0d10;
+      --bg-card: #121216;
+      --border-subtle: #262626;
+      --text-primary: #f5f5f7;
+      --text-muted: #9ca3af;
+      --accent-indigo: #818cf8;
+      --ig-gradient: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+      --cf-green: #1cd14f;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0;
+      background-color: var(--bg-pure);
+      color: var(--text-primary);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      overflow-x: hidden;
+    }
+
+    .font-novel { font-family: 'Cormorant Garamond', Georgia, serif; }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #2a2a32; border-radius: 999px; }
+
+    /* Instagram Rings */
+    .story-ring {
+      padding: 2.5px;
+      border-radius: 9999px;
+      background: var(--ig-gradient);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .story-ring.close-friends { background: var(--cf-green); }
+    .story-ring.seen { background: #36363c; }
+    .story-ring-inner {
+      padding: 2px;
+      background: #000;
+      border-radius: 9999px;
+      display: flex;
+    }
+
+    /* Image Filters */
+    .filter-none { filter: none; }
+    .filter-rain { filter: contrast(1.06) brightness(0.92) saturate(0.82) hue-rotate(8deg); }
+    .filter-porcelain { filter: contrast(0.95) brightness(1.07) saturate(0.75); }
+    .filter-night { filter: contrast(1.14) brightness(0.84) saturate(1.1) hue-rotate(-10deg); }
+    .filter-warm { filter: contrast(1.03) brightness(1.02) sepia(0.18) saturate(1.12); }
+
+    /* Double-tap heart animation */
+    @keyframes popHeart {
+      0% { transform: scale(0.2); opacity: 0; }
+      35% { transform: scale(1.25); opacity: 1; }
+      70% { transform: scale(0.95); opacity: 1; }
+      100% { transform: scale(1.1); opacity: 0; }
+    }
+    .heart-burst {
+      animation: popHeart 0.8s cubic-bezier(0.17, 0.89, 0.32, 1.49) forwards;
+    }
+
+    /* Equalizer animation */
+    @keyframes eqBar {
+      0%, 100% { height: 4px; }
+      50% { height: 14px; }
+    }
+    .eq-bar:nth-child(1) { animation: eqBar 0.7s infinite ease-in-out; }
+    .eq-bar:nth-child(2) { animation: eqBar 0.5s infinite ease-in-out 0.15s; }
+    .eq-bar:nth-child(3) { animation: eqBar 0.8s infinite ease-in-out 0.3s; }
+
+    /* Narrative styling */
+    .narration-action { color: #b8bcc8; font-style: italic; }
+    .narration-dialogue { color: #f8fafc; font-weight: 400; }
+    .thought-bubble {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(168, 85, 247, 0.08));
+      border-left: 2px solid #818cf8;
+      color: #c7d2fe;
+      font-style: italic;
+    }
+
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-black text-zinc-100 select-none sm:select-auto">
+
+  <!-- TOP GLOBAL BAR -->
+  <header class="sticky top-0 z-40 bg-black/90 backdrop-blur-md border-b border-zinc-800/90 px-3 py-2 flex flex-wrap items-center justify-between gap-2">
+    <div class="flex items-center gap-2">
+      <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-xs font-bold text-white shadow">絆</div>
+      <div>
+        <span class="font-semibold tracking-tight text-sm text-white">Kizuna</span>
+        <span class="text-[11px] text-zinc-400 ml-1 hidden sm:inline">// Campus Tokio</span>
+      </div>
+    </div>
+
+    <!-- Mode Switcher -->
+    <div class="flex items-center bg-zinc-900/90 border border-zinc-800 rounded-full p-0.5 text-xs">
+      <button onclick="setViewMode('phone')" id="btn-mode-phone" class="px-3 py-1 rounded-full font-medium transition bg-zinc-800 text-white">📱 Celular</button>
+      <button onclick="setViewMode('world')" id="btn-mode-world" class="px-3 py-1 rounded-full font-medium transition text-zinc-400 hover:text-white">🌧️ Vida Exterior</button>
+      <button onclick="setViewMode('split')" id="btn-mode-split" class="hidden lg:inline-flex px-3 py-1 rounded-full font-medium transition text-zinc-400 hover:text-white">◫ Dividida</button>
+    </div>
+
+    <!-- Ambient Audio + API Controls -->
+    <div class="flex items-center gap-1.5 relative">
+      <button onclick="toggleAmbientMenu()" id="btn-ambient" class="px-2.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs flex items-center gap-1.5 text-zinc-300 transition" title="Sonido ambiental">
+        <span id="ambient-icon">🎧</span>
+        <span id="ambient-label" class="hidden sm:inline">Off</span>
+      </button>
+
+      <!-- Ambient Audio Popover -->
+      <div id="ambient-popover" class="hidden absolute right-14 top-10 w-56 bg-zinc-950 border border-zinc-800 rounded-xl p-3 shadow-2xl z-50 text-xs space-y-2.5">
+        <div class="font-semibold text-zinc-200 flex items-center justify-between">
+          <span>🎧 Ambiente sonoro</span>
+          <button onclick="toggleAmbientMenu()" class="text-zinc-500 hover:text-white">✕</button>
+        </div>
+        <div class="grid grid-cols-3 gap-1">
+          <button onclick="setAmbientMode('off')" id="amb-off" class="py-1.5 rounded-lg bg-zinc-800 text-white font-medium">Off</button>
+          <button onclick="setAmbientMode('rain')" id="amb-rain" class="py-1.5 rounded-lg bg-zinc-900 text-zinc-400 hover:text-white">🌧️ Lluvia</button>
+          <button onclick="setAmbientMode('cafe')" id="amb-cafe" class="py-1.5 rounded-lg bg-zinc-900 text-zinc-400 hover:text-white">☕ Café</button>
+        </div>
+        <div class="space-y-1">
+          <div class="flex justify-between text-[11px] text-zinc-400">
+            <span>Volumen</span>
+            <span id="amb-vol-text">35%</span>
+          </div>
+          <input type="range" min="0" max="100" value="35" oninput="setAmbientVolume(this.value)" class="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg cursor-pointer">
+        </div>
+      </div>
+
+      <button onclick="openModal('modal-api')" id="btn-api-status" class="px-2.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs flex items-center gap-1 text-zinc-300 transition">
+        <span>🔑</span>
+        <span class="hidden sm:inline">API</span>
+        <span id="api-dot" class="w-2 h-2 rounded-full bg-amber-500"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- CROSS-NOTIFICATION TOAST -->
+  <div id="cross-toast" onclick="handleToastClick()" class="hidden fixed top-14 right-4 z-50 max-w-xs bg-zinc-900/95 backdrop-blur-md border border-zinc-700/80 rounded-2xl p-3 shadow-2xl cursor-pointer transition transform hover:scale-[1.02]">
+    <div class="flex items-center gap-2.5">
+      <img id="toast-avatar" src="" class="w-9 h-9 rounded-full object-cover border border-zinc-700" />
+      <div class="min-w-0 flex-1">
+        <div class="flex items-center justify-between gap-2">
+          <span id="toast-title" class="text-xs font-semibold text-white truncate"></span>
+          <span class="text-[10px] text-indigo-400">ahora</span>
+        </div>
+        <p id="toast-body" class="text-xs text-zinc-300 truncate mt-0.5"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN WORKSPACE -->
+  <main id="workspace" class="flex-1 flex justify-center overflow-hidden">
+
+    <!-- ==================== LEFT/PHONE PANE: INSTAGRAM DARK MODE ==================== -->
+    <section id="pane-phone" class="w-full max-w-[460px] border-x border-zinc-800/80 bg-black flex flex-col h-[calc(100vh-49px)] relative">
+      
+      <!-- Phone Top Header -->
+      <div class="px-4 py-2.5 border-b border-zinc-900 flex items-center justify-between bg-black/95">
+        <div class="flex items-center gap-2">
+          <h1 class="font-novel italic text-2xl font-semibold tracking-wide text-white">Kizuna</h1>
+          <span class="text-[10px] px-2 py-0.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400">Tokio</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <button onclick="openStoryStudio()" class="text-zinc-200 hover:text-white text-sm flex items-center gap-1 bg-zinc-900 hover:bg-zinc-800 px-2.5 py-1 rounded-full border border-zinc-800 transition" title="Subir historia">
+            <span>＋</span><span class="text-xs">Historia</span>
+          </button>
+          <button onclick="switchPhoneTab('dm')" class="relative text-zinc-200 hover:text-white p-1" title="Mensajes Directos">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+            <span id="dm-unread-badge" class="hidden absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-rose-500 text-[10px] font-bold flex items-center justify-center text-white">1</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- PHONE TAB 1: HOME FEED -->
+      <div id="tab-feed" class="flex-1 overflow-y-auto pb-16">
+        <!-- Stories Tray -->
+        <div id="stories-tray" class="px-3 py-3 border-b border-zinc-900 flex items-center gap-3.5 overflow-x-auto no-scrollbar"></div>
+
+        <!-- Campus Action Strip -->
+        <div class="px-3 py-2 border-b border-zinc-900/90 bg-zinc-950/60 flex items-center justify-between gap-2">
+          <button onclick="simulateCampusPost()" id="btn-sim-campus" class="flex-1 py-1.5 px-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-[11px] font-medium text-zinc-200 flex items-center justify-center gap-1.5 transition">
+            <span>✨</span><span>Simular campus</span>
+          </button>
+          <button onclick="generateCampusRumor()" id="btn-rumor-campus" class="flex-1 py-1.5 px-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-[11px] font-medium text-indigo-300 flex items-center justify-center gap-1.5 transition">
+            <span>👁️</span><span>Rumor del campus</span>
+          </button>
+        </div>
+
+        <!-- Posts Container -->
+        <div id="feed-posts" class="divide-y divide-zinc-900"></div>
+      </div>
+
+      <!-- PHONE TAB 2: EXPLORE & OCS -->
+      <div id="tab-explore" class="hidden flex-1 overflow-y-auto pb-16 p-3 space-y-4">
+        <div class="flex items-center justify-between gap-2">
+          <div>
+            <h2 class="text-sm font-semibold text-white">Comunidad & Personajes IA</h2>
+            <p class="text-[11px] text-zinc-400">Edita sus psicologías o crea compañeros nuevos</p>
+          </div>
+          <div class="flex gap-1.5">
+            <button onclick="createRandomOC(true)" id="btn-random-oc-quick" class="px-2.5 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 text-xs font-medium flex items-center gap-1 transition">
+              <span>🎲</span><span>Aleatorio</span>
+            </button>
+            <button onclick="openOCModal()" class="px-2.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-white text-xs font-medium transition">
+              + Crear
+            </button>
+          </div>
+        </div>
+
+        <div id="oc-list" class="space-y-2.5"></div>
+      </div>
+
+      <!-- PHONE TAB 3: CREATE POST -->
+      <div id="tab-create" class="hidden flex-1 overflow-y-auto pb-16 p-4 space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm font-semibold text-white">Nueva publicación</h2>
+          <select id="post-author-select" class="bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1 text-xs text-zinc-200 outline-none"></select>
+        </div>
+
+        <!-- Upload / Drop Zone -->
+        <div id="post-dropzone" onclick="document.getElementById('post-file-input').click()" class="border-2 border-dashed border-zinc-800 hover:border-indigo-500/60 rounded-2xl p-4 text-center cursor-pointer transition bg-zinc-950/60 relative overflow-hidden">
+          <input type="file" id="post-file-input" accept="image/*" class="hidden" onchange="handlePostImageSelect(event)" />
+          <div id="post-preview-empty" class="py-6 space-y-2">
+            <div class="text-2xl">📸</div>
+            <p class="text-xs font-medium text-zinc-200">Sube una foto real, arrástrala o pégala (Ctrl+V)</p>
+            <p class="text-[11px] text-zinc-500">Gemini analizará lo que aparece en tu imagen</p>
+          </div>
+          <div id="post-preview-wrap" class="hidden relative mx-auto overflow-hidden rounded-xl bg-zinc-900">
+            <img id="post-preview-img" src="" class="w-full h-full object-cover transition-all duration-300" />
+            <button type="button" onclick="event.stopPropagation(); clearPostImage()" class="absolute top-2 right-2 bg-black/75 text-white text-xs px-2 py-1 rounded-full border border-zinc-700">✕ Quitar</button>
+          </div>
+        </div>
+
+        <!-- Aspect & Filters -->
+        <div class="flex items-center justify-between gap-2 text-xs">
+          <div class="flex items-center gap-1 bg-zinc-900 p-1 rounded-lg border border-zinc-800">
+            <button type="button" onclick="setPostAspect('1:1')" id="aspect-1-1" class="px-2.5 py-1 rounded bg-zinc-800 text-white font-medium">1:1</button>
+            <button type="button" onclick="setPostAspect('4:5')" id="aspect-4-5" class="px-2.5 py-1 rounded text-zinc-400">4:5</button>
+          </div>
+          <div class="flex items-center gap-1 overflow-x-auto no-scrollbar">
+            <button type="button" onclick="setPostFilter('filter-none', this)" class="post-filter-btn px-2.5 py-1 rounded-full bg-indigo-600 text-white text-[11px]">Original</button>
+            <button type="button" onclick="setPostFilter('filter-rain', this)" class="post-filter-btn px-2.5 py-1 rounded-full bg-zinc-900 text-zinc-400 text-[11px]">Tokio Lluvia</button>
+            <button type="button" onclick="setPostFilter('filter-porcelain', this)" class="post-filter-btn px-2.5 py-1 rounded-full bg-zinc-900 text-zinc-400 text-[11px]">Porcelana</button>
+            <button type="button" onclick="setPostFilter('filter-night', this)" class="post-filter-btn px-2.5 py-1 rounded-full bg-zinc-900 text-zinc-400 text-[11px]">Tren Nocturno</button>
+            <button type="button" onclick="setPostFilter('filter-warm', this)" class="post-filter-btn px-2.5 py-1 rounded-full bg-zinc-900 text-zinc-400 text-[11px]">Café Tibio</button>
+          </div>
+        </div>
+
+        <!-- Caption & @Mentions -->
+        <div class="space-y-2">
+          <textarea id="post-caption-input" rows="3" placeholder="Escribe un pie de foto... (usa @ para mencionar a alguien)" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-xs text-white placeholder-zinc-500 outline-none focus:border-indigo-500"></textarea>
+          <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+            <span class="text-[11px] text-zinc-500 shrink-0">Etiquetar:</span>
+            <div id="post-mention-chips" class="flex items-center gap-1"></div>
+          </div>
+        </div>
+
+        <input type="text" id="post-location-input" placeholder="📍 Ubicación (ej. Cafetería Komorebi, Tokio)" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 outline-none focus:border-indigo-500" />
+
+        <button onclick="publishPost()" id="btn-publish-post" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:opacity-95 text-white font-semibold text-xs shadow-lg transition">
+          Compartir publicación
+        </button>
+      </div>
+
+      <!-- PHONE TAB 4: DIRECT MESSAGES & 24H NOTES -->
+      <div id="tab-dm" class="hidden flex-1 flex flex-col overflow-hidden pb-12">
+        <!-- DM Inbox View -->
+        <div id="dm-inbox-view" class="flex-1 overflow-y-auto">
+          <!-- 24h Notes Strip -->
+          <div class="px-3 pt-3 pb-2 border-b border-zinc-900">
+            <div class="text-[11px] font-medium text-zinc-400 mb-2">Notas de 24 horas</div>
+            <div id="dm-notes-tray" class="flex items-start gap-3.5 overflow-x-auto no-scrollbar pt-4 pb-1"></div>
+          </div>
+
+          <div class="px-4 py-2.5 flex items-center justify-between">
+            <span class="text-xs font-semibold text-white">Mensajes</span>
+            <span class="text-[11px] text-zinc-500">Sincronizados con Tokio</span>
+          </div>
+          <div id="dm-threads-list" class="divide-y divide-zinc-900/70"></div>
+        </div>
+
+        <!-- DM Active Thread View -->
+        <div id="dm-chat-view" class="hidden flex-1 flex flex-col overflow-hidden">
+          <div class="px-3 py-2 border-b border-zinc-900 flex items-center justify-between bg-zinc-950/90">
+            <div class="flex items-center gap-2.5">
+              <button onclick="closeDMThread()" class="text-zinc-400 hover:text-white px-1 text-base">←</button>
+              <img id="dm-active-avatar" src="" class="w-8 h-8 rounded-full object-cover border border-zinc-800" />
+              <div>
+                <div id="dm-active-name" class="text-xs font-semibold text-white"></div>
+                <div id="dm-active-status" class="text-[10px] text-emerald-400">En línea • Campus Tokio</div>
+              </div>
+            </div>
+            <button onclick="openActiveOCFromDM()" class="text-[11px] text-zinc-400 hover:text-white px-2 py-1 rounded bg-zinc-900">Ficha</button>
+          </div>
+
+          <div id="dm-messages-box" class="flex-1 overflow-y-auto p-3 space-y-3"></div>
+
+          <!-- DM Image Preview -->
+          <div id="dm-img-preview-bar" class="hidden px-3 py-2 bg-zinc-900 border-t border-zinc-800 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <img id="dm-img-preview" src="" class="w-10 h-10 rounded object-cover" />
+              <span class="text-[11px] text-zinc-300">Foto lista para enviar</span>
+            </div>
+            <button onclick="clearDMImage()" class="text-xs text-zinc-400 hover:text-white">✕</button>
+          </div>
+
+          <!-- DM Input -->
+          <div class="p-2.5 border-t border-zinc-900 bg-black flex items-center gap-2">
+            <input type="file" id="dm-file-input" accept="image/*" class="hidden" onchange="handleDMImageSelect(event)" />
+            <button onclick="document.getElementById('dm-file-input').click()" class="p-2 rounded-full bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-xs" title="Enviar foto real">📷</button>
+            <input type="text" id="dm-input" onkeydown="if(event.key==='Enter') sendDMMessage()" placeholder="Envía un mensaje..." class="flex-1 bg-zinc-900 border border-zinc-800 rounded-full px-3.5 py-2 text-xs text-white placeholder-zinc-500 outline-none focus:border-indigo-500" />
+            <button onclick="sendDMMessage()" class="px-3.5 py-2 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold">Enviar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PHONE TAB 5: PROFILE -->
+      <div id="tab-profile" class="hidden flex-1 overflow-y-auto pb-16">
+        <div id="profile-header-box" class="p-4 border-b border-zinc-900 space-y-3"></div>
+        <div class="grid grid-cols-2 border-b border-zinc-900 text-xs font-medium">
+          <button onclick="setProfileGridTab('posts')" id="prof-tab-posts" class="py-2.5 border-b-2 border-white text-white">▦ Publicaciones</button>
+          <button onclick="setProfileGridTab('saved')" id="prof-tab-saved" class="py-2.5 border-b-2 border-transparent text-zinc-500">🔖 Guardados</button>
+        </div>
+        <div id="profile-grid" class="grid grid-cols-3 gap-0.5 bg-zinc-950"></div>
+      </div>
+
+      <!-- Phone Bottom Navigation -->
+      <nav class="absolute bottom-0 inset-x-0 h-12 bg-black/95 backdrop-blur-md border-t border-zinc-900 flex items-center justify-around z-30">
+        <button onclick="switchPhoneTab('feed')" id="nav-feed" class="p-2 text-white">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3l9 8h-3v9h-5v-6h-2v6H6v-9H3l9-8z"/></svg>
+        </button>
+        <button onclick="switchPhoneTab('explore')" id="nav-explore" class="p-2 text-zinc-500 hover:text-zinc-200">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+        </button>
+        <button onclick="switchPhoneTab('create')" id="nav-create" class="p-2 text-zinc-500 hover:text-zinc-200">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M12 8v8M8 12h8"/></svg>
+        </button>
+        <button onclick="switchPhoneTab('dm')" id="nav-dm" class="p-2 text-zinc-500 hover:text-zinc-200">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+        </button>
+        <button onclick="openOwnProfile()" id="nav-profile" class="p-1.5">
+          <img id="nav-moka-avatar" src="" class="w-6 h-6 rounded-full object-cover border border-zinc-600" />
+        </button>
+      </nav>
+    </section>
+
+    <!-- ==================== RIGHT/WORLD PANE: VIDA EXTERIOR ==================== -->
+    <section id="pane-world" class="hidden lg:flex flex-1 flex-col h-[calc(100vh-49px)] bg-zinc-950 relative overflow-hidden">
+      <!-- Ambient Background Image Layer -->
+      <div id="world-bg-layer" class="absolute inset-0 bg-cover bg-center opacity-20 pointer-events-none transition-all duration-700"></div>
+      <div class="absolute inset-0 bg-gradient-to-b from-black/80 via-zinc-950/85 to-black/95 pointer-events-none"></div>
+
+      <!-- World Header: Clock, Weather, Bag, Novel Mode, Bg -->
+      <div class="relative z-10 px-4 py-2.5 border-b border-zinc-800/80 bg-black/60 backdrop-blur-md flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-semibold text-white flex items-center gap-1.5">
+            <span>🌧️</span><span id="current-scene-title">Cafetería Komorebi</span>
+          </span>
+          <!-- Interactive Clock & Weather Pill -->
+          <div class="relative">
+            <button onclick="toggleClockPopover()" id="clock-weather-btn" class="px-2.5 py-1 rounded-full bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700/80 text-[11px] text-indigo-300 flex items-center gap-1.5 transition">
+              <span id="world-clock-display">13:15 hrs</span>
+              <span>•</span>
+              <span id="world-weather-display">🌧️ Lluvia 11°C</span>
+            </button>
+            <!-- Clock & Weather Popover -->
+            <div id="clock-popover" class="hidden absolute left-0 top-8 w-64 bg-zinc-950 border border-zinc-800 rounded-xl p-3 shadow-2xl z-50 text-xs space-y-2.5">
+              <div class="flex justify-between items-center font-semibold text-zinc-200">
+                <span>🕒 Reloj y Clima de Tokio</span>
+                <button onclick="toggleClockPopover()" class="text-zinc-500 hover:text-white">✕</button>
+              </div>
+              <div class="grid grid-cols-2 gap-1.5">
+                <button onclick="advanceClock(15)" class="py-1.5 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-200">+15 min</button>
+                <button onclick="advanceClock(60)" class="py-1.5 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-200">+1 hora</button>
+                <button onclick="setExactClock('15:45')" class="py-1.5 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-amber-300">15:45 Pre-Parcial</button>
+                <button onclick="setExactClock('23:45')" class="py-1.5 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-indigo-300">23:45 Último Tren</button>
+              </div>
+              <div class="pt-1 border-t border-zinc-800">
+                <div class="text-[11px] text-zinc-400 mb-1">Clima actual</div>
+                <div class="grid grid-cols-2 gap-1">
+                  <button onclick="setWeather('🌧️ Lluvia 11°C')" class="py-1 px-2 rounded bg-zinc-900 hover:bg-zinc-800 text-left text-[11px]">🌧️ Lluvia 11°C</button>
+                  <button onclick="setWeather('⛈️ Tormenta 9°C')" class="py-1 px-2 rounded bg-zinc-900 hover:bg-zinc-800 text-left text-[11px]">⛈️ Tormenta 9°C</button>
+                  <button onclick="setWeather('☁️ Nublado 12°C')" class="py-1 px-2 rounded bg-zinc-900 hover:bg-zinc-800 text-left text-[11px]">☁️ Nublado 12°C</button>
+                  <button onclick="setWeather('🌙 Despejado 8°C')" class="py-1 px-2 rounded bg-zinc-900 hover:bg-zinc-800 text-left text-[11px]">🌙 Despejado 8°C</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 relative">
+          <!-- Bag Button -->
+          <button onclick="toggleBagPopover()" class="px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs text-zinc-200 flex items-center gap-1 transition">
+            <span>👜</span><span>Bolso</span>
+          </button>
+
+          <!-- Bag Popover -->
+          <div id="bag-popover" class="hidden absolute right-0 top-9 w-72 bg-zinc-950 border border-zinc-800 rounded-xl p-3 shadow-2xl z-50 text-xs space-y-2.5">
+            <div class="flex items-center justify-between font-semibold text-zinc-200">
+              <span>👜 Bolso de cuero de Moka</span>
+              <button onclick="toggleBagPopover()" class="text-zinc-500 hover:text-white">✕</button>
+            </div>
+            <p class="text-[11px] text-zinc-400">Toca un objeto para usarlo en la escena actual:</p>
+            <div id="bag-items-list" class="space-y-1.5 max-h-48 overflow-y-auto"></div>
+            <div class="flex gap-1.5 pt-1 border-t border-zinc-800">
+              <input type="text" id="new-bag-item-input" placeholder="Añadir objeto..." class="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-2 py-1 text-[11px] text-white outline-none" />
+              <button onclick="addBagItem()" class="px-2.5 py-1 rounded-lg bg-indigo-600 text-white text-[11px] font-medium">+</button>
+            </div>
+          </div>
+
+          <!-- Novel Mode Button -->
+          <button onclick="openNovelModal()" class="px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs text-zinc-200 flex items-center gap-1 transition" title="Leer historia continua como novela">
+            <span>📖</span><span class="hidden sm:inline">Novela</span>
+          </button>
+
+          <!-- Background Upload -->
+          <input type="file" id="world-bg-input" accept="image/*" class="hidden" onchange="handleWorldBgSelect(event)" />
+          <button onclick="document.getElementById('world-bg-input').click()" class="px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs text-zinc-200 flex items-center gap-1 transition" title="Cambiar foto de fondo">
+            <span>🖼️</span><span class="hidden sm:inline">Fondo</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Scenario Transition Pills (Single Continuous History) -->
+      <div class="relative z-10 px-3 py-2 border-b border-zinc-900/90 bg-black/40 flex items-center gap-1.5 overflow-x-auto no-scrollbar text-[11px]">
+        <span class="text-zinc-500 shrink-0">Moverse a:</span>
+        <button onclick="changeSceneLocation('Cafetería Komorebi')" class="px-2.5 py-1 rounded-full bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 shrink-0 transition">☕ Komorebi</button>
+        <button onclick="changeSceneLocation('Biblioteca Central')" class="px-2.5 py-1 rounded-full bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 shrink-0 transition">📚 Biblioteca</button>
+        <button onclick="changeSceneLocation('Facultad de Humanidades')" class="px-2.5 py-1 rounded-full bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 shrink-0 transition">🏛️ Humanidades</button>
+        <button onclick="changeSceneLocation('Laboratorio de Ciencias')" class="px-2.5 py-1 rounded-full bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 shrink-0 transition">🧬 Lab. Ciencias</button>
+        <button onclick="changeSceneLocation('Último Tren Nocturno')" class="px-2.5 py-1 rounded-full bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 shrink-0 transition">🚃 Tren Nocturno</button>
+        <button onclick="changeSceneLocation('Mansión Momose')" class="px-2.5 py-1 rounded-full bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 shrink-0 transition">🏰 Mansión Momose</button>
+        <button onclick="promptCustomLocation()" class="px-2.5 py-1 rounded-full bg-indigo-950/60 hover:bg-indigo-900/60 border border-indigo-700/50 text-indigo-300 shrink-0 transition">📍 Otro lugar...</button>
+      </div>
+
+      <!-- Continuous Story Stream -->
+      <div id="world-story-stream" class="relative z-10 flex-1 overflow-y-auto p-4 sm:p-6 space-y-4"></div>
+
+      <!-- World Input Composer -->
+      <div class="relative z-10 p-3 border-t border-zinc-800/90 bg-black/85 backdrop-blur-md space-y-2">
+        <div class="flex items-center justify-between gap-2 text-[11px]">
+          <div class="flex items-center gap-1.5">
+            <button onclick="setWorldInputMode('action')" id="btn-mode-action" class="px-2.5 py-1 rounded-full bg-zinc-800 text-white font-medium transition">✍️ Acción / Diálogo</button>
+            <button onclick="setWorldInputMode('thought')" id="btn-mode-thought" class="px-2.5 py-1 rounded-full bg-zinc-900 text-zinc-400 hover:text-indigo-300 transition">💭 Pensamiento interno</button>
+          </div>
+          <span id="world-mode-hint" class="text-zinc-500 hidden sm:inline">Usa *asteriscos* para acciones y —guion para hablar</span>
+        </div>
+
+        <div class="flex items-end gap-2">
+          <textarea id="world-input" rows="2" onkeydown="if(event.key==='Enter' && !event.shiftKey){ event.preventDefault(); sendWorldTurn(); }" placeholder="*Acomodo despacio la manga de mi chaqueta negra...* —¿Qué haces por aquí?" class="flex-1 bg-zinc-900/95 border border-zinc-800 rounded-2xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-zinc-500 outline-none focus:border-indigo-500 resize-none"></textarea>
+          <button onclick="sendWorldTurn()" id="btn-send-world" class="px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-lg transition shrink-0">
+            Continuar
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- 1. STORY CREATION STUDIO MODAL -->
+  <div id="modal-story-studio" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-3">
+    <div class="w-full max-w-md bg-zinc-950 border border-zinc-800 rounded-3xl overflow-hidden flex flex-col max-h-[92vh]">
+      <div class="px-4 py-3 border-b border-zinc-900 flex items-center justify-between">
+        <h3 class="text-sm font-semibold text-white">Crear historia (9:16)</h3>
+        <button onclick="closeModal('modal-story-studio')" class="text-zinc-400 hover:text-white text-sm">✕</button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-4 space-y-3">
+        <!-- Live 9:16 Preview -->
+        <div id="story-studio-canvas" class="relative mx-auto w-52 h-80 rounded-2xl overflow-hidden bg-zinc-900 border border-zinc-800 shadow-2xl flex items-center justify-center">
+          <img id="story-studio-img" src="" class="absolute inset-0 w-full h-full object-cover" />
+          <div class="absolute inset-0 bg-gradient-to-b from-black/35 via-transparent to-black/60 pointer-events-none"></div>
+
+          <!-- Top Stickers Preview -->
+          <div class="absolute top-3 inset-x-2.5 flex flex-wrap gap-1 z-10">
+            <span id="preview-sticker-loc" class="hidden px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-[10px] text-white border border-white/15">📍 Cafetería Komorebi</span>
+            <span id="preview-sticker-time" class="hidden px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-[10px] text-white border border-white/15">🕒 13:15 • 🌧️ 11°C</span>
+          </div>
+
+          <!-- Floating Text Preview -->
+          <div id="preview-story-text" class="hidden absolute inset-x-3 z-10 text-center px-2.5 py-1.5 rounded-xl text-xs font-medium text-white bg-black/55 backdrop-blur-sm"></div>
+
+          <!-- Music Sticker Preview -->
+          <div id="preview-sticker-music" class="hidden absolute bottom-3 inset-x-2.5 z-10 px-2.5 py-1.5 rounded-xl bg-black/70 backdrop-blur-md border border-white/15 flex items-center gap-2">
+            <div class="flex items-end gap-0.5 h-3.5">
+              <span class="eq-bar w-0.5 bg-indigo-400 rounded-full"></span>
+              <span class="eq-bar w-0.5 bg-pink-400 rounded-full"></span>
+              <span class="eq-bar w-0.5 bg-indigo-400 rounded-full"></span>
+            </div>
+            <div class="min-w-0 flex-1 text-left">
+              <div id="preview-music-title" class="text-[10px] font-semibold text-white truncate"></div>
+              <div id="preview-music-artist" class="text-[9px] text-zinc-400 truncate"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upload Real Photo or Preset -->
+        <div class="flex items-center gap-2">
+          <input type="file" id="story-file-input" accept="image/*" class="hidden" onchange="handleStoryImageSelect(event)" />
+          <button onclick="document.getElementById('story-file-input').click()" class="flex-1 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-medium text-white">📸 Subir foto real</button>
+          <select id="story-preset-select" onchange="applyStoryPreset(this.value)" class="bg-zinc-900 border border-zinc-800 rounded-xl px-2.5 py-2 text-xs text-zinc-300 outline-none">
+            <option value="cafe">☕ Escena: Komorebi</option>
+            <option value="train">🚃 Escena: Tren nocturno</option>
+            <option value="library">📚 Escena: Biblioteca</option>
+            <option value="cat">🐈‍⬛ Escena: Gato blanco</option>
+          </select>
+        </div>
+
+        <!-- Filter & Text -->
+        <div class="grid grid-cols-2 gap-2">
+          <select id="story-filter-select" onchange="updateStoryPreview()" class="bg-zinc-900 border border-zinc-800 rounded-xl px-2.5 py-2 text-xs text-zinc-200 outline-none">
+            <option value="filter-none">Filtro: Original</option>
+            <option value="filter-rain">Filtro: Tokio Lluvia</option>
+            <option value="filter-porcelain">Filtro: Porcelana</option>
+            <option value="filter-night">Filtro: Tren Nocturno</option>
+            <option value="filter-warm">Filtro: Café Tibio</option>
+          </select>
+          <select id="story-text-pos" onchange="updateStoryPreview()" class="bg-zinc-900 border border-zinc-800 rounded-xl px-2.5 py-2 text-xs text-zinc-200 outline-none">
+            <option value="top-14">Texto: Arriba</option>
+            <option value="top-1/2 -translate-y-1/2" selected>Texto: Centro</option>
+            <option value="bottom-14">Texto: Abajo</option>
+          </select>
+        </div>
+
+        <input type="text" id="story-text-input" oninput="updateStoryPreview()" placeholder="Aa Escribe algo sobre la historia..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 outline-none" />
+
+        <!-- Custom Music Selector -->
+        <div class="p-2.5 rounded-xl bg-zinc-900/70 border border-zinc-800 space-y-2">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-medium text-zinc-200">🎵 Música de la historia</span>
+            <button type="button" onclick="previewStoryMusicSynth()" class="text-[11px] text-indigo-400 hover:text-indigo-300">▶ Probar tono</button>
+          </div>
+          <select id="story-music-preset" onchange="onStoryMusicPresetChange()" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs text-zinc-200 outline-none">
+            <option value="">Sin música</option>
+            <option value="Yume Utsutsu|Lamp">Lamp – Yume Utsutsu</option>
+            <option value="Porcelain|Ichiko Aoba">Ichiko Aoba – Porcelain</option>
+            <option value="Luv(sic) pt.3|Nujabes">Nujabes – Luv(sic) pt.3</option>
+            <option value="Arne|Haruka Nakamura">Haruka Nakamura – Arne</option>
+            <option value="Gymnopédie No.1|Erik Satie">Erik Satie – Gymnopédie No.1</option>
+            <option value="custom">✍️ Escribir canción personalizada...</option>
+          </select>
+          <div id="story-custom-music-fields" class="hidden grid grid-cols-2 gap-1.5">
+            <input type="text" id="story-music-custom-title" oninput="updateStoryPreview()" placeholder="Nombre de la canción" class="bg-zinc-950 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs text-white outline-none" />
+            <input type="text" id="story-music-custom-artist" oninput="updateStoryPreview()" placeholder="Artista" class="bg-zinc-950 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs text-white outline-none" />
+          </div>
+        </div>
+
+        <!-- Stickers & Audience -->
+        <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+          <div class="flex items-center gap-1.5">
+            <button type="button" onclick="toggleStorySticker('loc')" id="btn-st-loc" class="px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400">📍 Lugar</button>
+            <button type="button" onclick="toggleStorySticker('time')" id="btn-st-time" class="px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400">🕒 Hora/Clima</button>
+          </div>
+          <button type="button" onclick="toggleStoryAudience()" id="btn-story-audience" class="px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-200 font-medium">
+            🌐 Todos
+          </button>
+        </div>
+      </div>
+
+      <div class="p-3 border-t border-zinc-900 flex gap-2">
+        <button onclick="publishStory()" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-pink-600 text-white font-semibold text-xs">Publicar historia</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. FULLSCREEN STORY VIEWER MODAL -->
+  <div id="modal-story-viewer" class="hidden fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-2">
+    <div class="relative w-full max-w-sm h-[86vh] rounded-3xl overflow-hidden bg-zinc-900 border border-zinc-800 flex flex-col justify-between shadow-2xl">
+      <img id="viewer-bg-img" src="" class="absolute inset-0 w-full h-full object-cover" />
+      <div class="absolute inset-0 bg-gradient-to-b from-black/65 via-transparent to-black/80 pointer-events-none"></div>
+
+      <!-- Top Progress & Author -->
+      <div class="relative z-10 p-3 space-y-2.5">
+        <div id="viewer-progress-bars" class="flex gap-1"></div>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <img id="viewer-avatar" src="" class="w-8 h-8 rounded-full object-cover border border-white/30" />
+            <div>
+              <div class="flex items-center gap-1.5">
+                <span id="viewer-username" class="text-xs font-semibold text-white"></span>
+                <span id="viewer-cf-badge" class="hidden px-1.5 py-0.2 rounded bg-emerald-500 text-black text-[9px] font-bold">Mejores amigos</span>
+              </div>
+              <span id="viewer-time" class="text-[10px] text-zinc-300"></span>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="generateAIStory()" id="btn-gen-ai-story" class="px-2 py-1 rounded-full bg-white/15 hover:bg-white/25 text-[10px] text-white backdrop-blur-md">✨ Historia IA</button>
+            <button onclick="closeStoryViewer()" class="text-white/80 hover:text-white text-lg px-1">✕</button>
+          </div>
+        </div>
+        <!-- Stickers in Viewer -->
+        <div id="viewer-stickers-row" class="flex flex-wrap gap-1.5"></div>
+      </div>
+
+      <!-- Tap Zones -->
+      <div class="relative z-10 flex-1 flex">
+        <div onclick="prevStorySlide()" class="w-1/3 h-full cursor-pointer"></div>
+        <div class="w-1/3 h-full flex items-center justify-center pointer-events-none">
+          <div id="viewer-floating-text" class="hidden px-3 py-1.5 rounded-xl bg-black/60 backdrop-blur-md text-xs text-white text-center max-w-[85%]"></div>
+        </div>
+        <div onclick="nextStorySlide()" class="w-1/3 h-full cursor-pointer"></div>
+      </div>
+
+      <!-- Bottom Music + Reply / Viewers -->
+      <div class="relative z-10 p-3 space-y-2.5">
+        <div id="viewer-music-bar" class="hidden px-3 py-1.5 rounded-xl bg-black/65 backdrop-blur-md border border-white/10 flex items-center gap-2">
+          <div class="flex items-end gap-0.5 h-3">
+            <span class="eq-bar w-0.5 bg-indigo-400"></span>
+            <span class="eq-bar w-0.5 bg-pink-400"></span>
+            <span class="eq-bar w-0.5 bg-indigo-400"></span>
+          </div>
+          <span id="viewer-music-text" class="text-[11px] text-zinc-200 truncate"></span>
+        </div>
+
+        <!-- Own Story Footer -->
+        <div id="viewer-own-footer" class="hidden flex items-center justify-between text-xs text-white">
+          <button onclick="toggleStoryViewersList()" class="flex items-center gap-1.5 bg-black/60 px-3 py-1.5 rounded-full border border-white/15">
+            <span>👁️</span><span id="viewer-seen-count">Visto por 0</span>
+          </button>
+          <button onclick="deleteCurrentStory()" class="bg-rose-950/80 text-rose-300 px-3 py-1.5 rounded-full border border-rose-800/60">🗑️ Borrar</button>
+        </div>
+
+        <!-- Viewers Drawer -->
+        <div id="viewer-seen-drawer" class="hidden bg-zinc-950/95 border border-zinc-800 rounded-2xl p-2.5 max-h-32 overflow-y-auto space-y-1.5"></div>
+
+        <!-- Other User Story Reply Footer -->
+        <div id="viewer-reply-footer" class="flex items-center gap-2">
+          <input type="text" id="viewer-reply-input" onkeydown="if(event.key==='Enter') sendStoryReply()" placeholder="Responder historia por DM..." class="flex-1 bg-black/60 backdrop-blur-md border border-white/25 rounded-full px-3.5 py-2 text-xs text-white placeholder-zinc-300 outline-none" />
+          <button onclick="reactToStory('❤️')" class="text-lg hover:scale-125 transition">❤️</button>
+          <button onclick="reactToStory('✨')" class="text-lg hover:scale-125 transition">✨</button>
+          <button onclick="sendStoryReply()" class="px-3 py-2 rounded-full bg-indigo-600 text-white text-xs font-semibold">Enviar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 24H NOTE COMPOSER MODAL -->
+  <div id="modal-note" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="w-full max-w-xs bg-zinc-950 border border-zinc-800 rounded-3xl p-4 space-y-3 text-center">
+      <div class="flex justify-between items-center">
+        <span class="text-xs font-semibold text-white">Tu nota de 24 horas</span>
+        <button onclick="closeModal('modal-note')" class="text-zinc-500 hover:text-white text-sm">✕</button>
+      </div>
+      <img id="note-modal-avatar" src="" class="w-16 h-16 rounded-full object-cover mx-auto border-2 border-zinc-700" />
+      <input type="text" id="note-text-input" maxlength="60" placeholder="Comparte qué estás haciendo... (máx 60)" class="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-3 py-2.5 text-xs text-center text-white outline-none focus:border-indigo-500" />
+      <input type="text" id="note-music-input" maxlength="40" placeholder="🎵 Canción opcional (ej. Lamp - Yume Utsutsu)" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-[11px] text-center text-zinc-300 outline-none" />
+      <div class="flex gap-2">
+        <button onclick="clearOwnNote()" class="flex-1 py-2 rounded-xl bg-zinc-900 text-zinc-400 text-xs">Quitar</button>
+        <button onclick="saveOwnNote()" class="flex-1 py-2 rounded-xl bg-indigo-600 text-white font-semibold text-xs">Compartir</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. CREATE / EDIT OC MODAL -->
+  <div id="modal-oc" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3">
+    <div class="w-full max-w-md bg-zinc-950 border border-zinc-800 rounded-3xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div class="px-4 py-3 border-b border-zinc-900 flex items-center justify-between">
+        <h3 id="oc-modal-title" class="text-sm font-semibold text-white">Personaje IA</h3>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="fillRandomOCFields()" class="px-2.5 py-1 rounded-lg bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-[11px] font-medium">🎲 Aleatorio</button>
+          <button onclick="closeModal('modal-oc')" class="text-zinc-400 hover:text-white text-sm">✕</button>
+        </div>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-4 space-y-3 text-xs">
+        <input type="hidden" id="oc-edit-id" />
+        <div class="flex items-center gap-3">
+          <div class="relative cursor-pointer" onclick="document.getElementById('oc-avatar-input').click()">
+            <img id="oc-edit-avatar-preview" src="" class="w-16 h-16 rounded-full object-cover border border-zinc-700" />
+            <span class="absolute -bottom-1 -right-1 bg-indigo-600 text-white text-[10px] px-1.5 py-0.5 rounded-full">📷</span>
+          </div>
+          <input type="file" id="oc-avatar-input" accept="image/*" class="hidden" onchange="handleOCAvatarSelect(event)" />
+          <div class="flex-1 space-y-2">
+            <input type="text" id="oc-edit-name" placeholder="Nombre completo" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-white outline-none" />
+            <input type="text" id="oc-edit-handle" placeholder="@usuario" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-zinc-300 outline-none" />
+          </div>
+        </div>
+
+        <input type="text" id="oc-edit-role" placeholder="Facultad / Rol (ej. Posgrado Biología • 23 años)" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-zinc-200 outline-none" />
+        <textarea id="oc-edit-bio" rows="2" placeholder="Biografía corta de Instagram..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 text-zinc-200 outline-none"></textarea>
+        <textarea id="oc-edit-personality" rows="5" placeholder="Psicología, apariencia, estilo de habla y relación con Moka..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 text-zinc-200 outline-none"></textarea>
+      </div>
+
+      <div class="p-3 border-t border-zinc-900 flex gap-2">
+        <button id="btn-delete-oc" onclick="deleteCurrentOC()" class="hidden px-3 py-2 rounded-xl bg-rose-950/70 text-rose-300 border border-rose-800/50 text-xs">Eliminar</button>
+        <button onclick="saveOC()" class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs">Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. NOVEL READER MODAL -->
+  <div id="modal-novel" class="hidden fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center p-3">
+    <div class="w-full max-w-2xl bg-zinc-950 border border-zinc-800 rounded-3xl overflow-hidden flex flex-col h-[88vh]">
+      <div class="px-5 py-3.5 border-b border-zinc-900 flex items-center justify-between">
+        <div>
+          <h3 class="font-novel text-xl font-semibold text-white">Kizuna — Crónicas de Tokio</h3>
+          <p class="text-[11px] text-zinc-400">Modo lectura continua de Vida Exterior</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="downloadNovelTxt()" class="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs text-zinc-200">⬇️ Descargar .txt</button>
+          <button onclick="closeModal('modal-novel')" class="text-zinc-400 hover:text-white text-base px-1">✕</button>
+        </div>
+      </div>
+      <div id="novel-content-box" class="flex-1 overflow-y-auto p-6 sm:p-10 font-novel text-lg leading-relaxed text-zinc-200 space-y-5"></div>
+    </div>
+  </div>
+
+  <!-- 6. API & JSON BACKUP MODAL -->
+  <div id="modal-api" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-zinc-950 border border-zinc-800 rounded-3xl p-5 space-y-4 text-xs">
+      <div class="flex items-center justify-between">
+        <h3 class="text-sm font-semibold text-white">🔑 Configuración IA & Respaldos</h3>
+        <button onclick="closeModal('modal-api')" class="text-zinc-400 hover:text-white">✕</button>
+      </div>
+
+      <div class="space-y-2">
+        <label class="text-zinc-300 font-medium block">Clave API gratuita de Google AI Studio</label>
+        <input type="password" id="api-key-input" placeholder="AIzaSy..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-white outline-none focus:border-indigo-500" />
+        <p class="text-[11px] text-zinc-400">Obtén tu clave gratis en <span class="text-indigo-400">aistudio.google.com</span>. Se guarda solo en tu navegador.</p>
+      </div>
+
+      <div class="flex gap-2">
+        <button onclick="saveApiKey()" class="flex-1 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold">Guardar clave</button>
+        <button onclick="testApiKey()" id="btn-test-api" class="px-3 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-200">Probar</button>
+      </div>
+
+      <div class="pt-3 border-t border-zinc-900 space-y-2">
+        <div class="font-medium text-zinc-300">Respaldo completo (Fotos, Chats, Historias y OCs)</div>
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="exportBackupJSON()" class="py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-200">📤 Exportar JSON</button>
+          <button onclick="document.getElementById('import-json-input').click()" class="py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-200">📥 Importar JSON</button>
+          <input type="file" id="import-json-input" accept=".json" class="hidden" onchange="importBackupJSON(event)" />
+        </div>
+        <button onclick="resetAllData()" class="w-full py-2 rounded-xl bg-rose-950/50 hover:bg-rose-950 border border-rose-900/50 text-rose-300 mt-1">Restaurar historia inicial</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. SHARE POST TO DM MODAL -->
+  <div id="modal-share" class="hidden fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-4">
+    <div class="w-full max-w-xs bg-zinc-950 border border-zinc-800 rounded-3xl p-4 space-y-3 text-xs">
+      <div class="flex justify-between items-center">
+        <span class="font-semibold text-white">Enviar publicación por DM</span>
+        <button onclick="closeModal('modal-share')" class="text-zinc-500">✕</button>
+      </div>
+      <div id="share-targets-list" class="space-y-1.5"></div>
+    </div>
+  </div>
+
+  <script>
+    // ==================== PROCEDURAL ART & AVATAR GENERATOR ====================
+    function makeProceduralAvatar(initials, bg1, bg2, accent) {
+      const c = document.createElement('canvas');
+      c.width = 240; c.height = 240;
+      const ctx = c.getContext('2d');
+      const g = ctx.createLinearGradient(0, 0, 240, 240);
+      g.addColorStop(0, bg1); g.addColorStop(1, bg2);
+      ctx.fillStyle = g; ctx.fillRect(0, 0, 240, 240);
+
+      ctx.strokeStyle = accent; ctx.lineWidth = 2; ctx.globalAlpha = 0.25;
+      ctx.beginPath(); ctx.arc(120, 120, 86, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(120, 120, 58, 0, Math.PI * 2); ctx.stroke();
+
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = '#f8fafc';
+      ctx.font = '600 64px "Cormorant Garamond", serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(initials, 120, 124);
+      return c.toDataURL('image/jpeg', 0.85);
+    }
+
+    function makeSceneArt(theme) {
+      const c = document.createElement('canvas');
+      c.width = 720; c.height = 720;
+      const ctx = c.getContext('2d');
+
+      if (theme === 'cafe') {
+        const g = ctx.createLinearGradient(0, 0, 0, 720);
+        g.addColorStop(0, '#181412'); g.addColorStop(0.55, '#2b211b'); g.addColorStop(1, '#0c0b0d');
+        ctx.fillStyle = g; ctx.fillRect(0, 0, 720, 720);
+        // Warm window glow
+        ctx.fillStyle = 'rgba(245, 185, 113, 0.14)';
+        ctx.fillRect(70, 60, 580, 390);
+        // Rain streaks
+        ctx.strokeStyle = 'rgba(180, 205, 230, 0.22)'; ctx.lineWidth = 2;
+        for (let i = 0; i < 45; i++) {
+          const x = 80 + (i * 37) % 560, y = 70 + (i * 53) % 340;
+          ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - 8, y + 36); ctx.stroke();
+        }
+        // Table & Cup & Umbrella silhouette
+        ctx.fillStyle = '#14100e'; ctx.fillRect(0, 460, 720, 260);
+        ctx.fillStyle = '#e7e5e4'; ctx.beginPath(); ctx.arc(270, 490, 44, 0, Math.PI); ctx.fill();
+        ctx.fillStyle = '#1e1b4b'; ctx.fillRect(390, 488, 220, 18);
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = 'italic 26px "Cormorant Garamond", serif';
+        ctx.fillText('Komorebi • 13:15 hrs • Tokio', 72, 655);
+      } else if (theme === 'lab' || theme === 'train') {
+        const g = ctx.createLinearGradient(0, 0, 720, 720);
+        g.addColorStop(0, '#070b14'); g.addColorStop(1, '#111827');
+        ctx.fillStyle = g; ctx.fillRect(0, 0, 720, 720);
+        ctx.strokeStyle = 'rgba(129, 140, 248, 0.25)'; ctx.lineWidth = 1.5;
+        for (let r = 60; r <= 300; r += 60) {
+          ctx.beginPath(); ctx.arc(360, 340, r, 0, Math.PI * 2); ctx.stroke();
+        }
+        ctx.fillStyle = 'rgba(148, 163, 184, 0.85)';
+        ctx.font = 'italic 26px "Cormorant Garamond", serif';
+        ctx.fillText(theme === 'lab' ? 'Facultad de Ciencias • Cultivos nocturnos' : 'Último tren nocturno • Línea Chūō', 64, 655);
+      } else if (theme === 'cat' || theme === 'sweets') {
+        const g = ctx.createLinearGradient(0, 0, 720, 720);
+        g.addColorStop(0, '#1c1917'); g.addColorStop(1, '#292524');
+        ctx.fillStyle = g; ctx.fillRect(0, 0, 720, 720);
+        ctx.fillStyle = 'rgba(244, 114, 182, 0.16)';
+        ctx.beginPath(); ctx.arc(360, 340, 190, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#f5f5f4';
+        ctx.font = 'italic 28px "Cormorant Garamond", serif';
+        ctx.fillText(theme === 'cat' ? 'Tarde tranquila en casa' : 'Matcha & Taiyaki • Shibuya', 72, 655);
+      } else {
+        const g = ctx.createLinearGradient(0, 0, 720, 720);
+        g.addColorStop(0, '#0f172a'); g.addColorStop(1, '#09090b');
+        ctx.fillStyle = g; ctx.fillRect(0, 0, 720, 720);
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = 'italic 26px "Cormorant Garamond", serif';
+        ctx.fillText('Biblioteca Central • Apuntes de Antropología', 64, 655);
+      }
+      return c.toDataURL('image/jpeg', 0.85);
+    }
+
+    // ==================== DEFAULT STATE ====================
+    const STORAGE_KEY = 'kizuna_tokio_v3';
+
+    function buildDefaultState() {
+      const mokaAv = makeProceduralAvatar('MM', '#18181b', '#312e81', '#e2e8f0');
+      const ayatoAv = makeProceduralAvatar('AF', '#09090b', '#1e293b', '#94a3b8');
+      const hinaAv = makeProceduralAvatar('HF', '#3b0764', '#831843', '#fbcfe8');
+      const campusAv = makeProceduralAvatar('TK', '#0f172a', '#1e1b4b', '#818cf8');
+
+      return {
+        apiKey: '',
+        model: 'gemini-2.5-flash',
+        viewMode: 'split',
+        clock: '13:15',
+        weather: '🌧️ Lluvia 11°C',
+        currentScene: 'Cafetería Komorebi',
+        worldBg: makeSceneArt('cafe'),
+        activeProfileId: 'moka',
+        profileGridTab: 'posts',
+        characters: {
+          moka: {
+            id: 'moka',
+            isUser: true,
+            name: 'Moka Momose',
+            handle: '@moka.m',
+            role: 'Antropología • 2.º año • 19 años',
+            avatar: mokaAv,
+            bio: 'Tokio • Antropología & tardes de lluvia.\nUn té caliente y silencio.',
+            personality: 'Moka Momose, 19 años (14 de noviembre), mitad japonesa y mitad rusa. Estudia 2.º año de Antropología en Tokio. Mide 1,71 m, muy esbelta, piel pálida como porcelana, pequeño lunar bajo el ojo izquierdo, cabello negro azabache larguísimo con flequillo recto y cintillo blanco, ojos grandes gris azulado de mirada felina y melancólica. Estilo dark academia, gótico suave y streetwear con mangas largas, faldas de tiro alto o pantalones baggy. Lleva bolso oscuro con tablet, tarjeta negra (que usa con total naturalidad sin presumir) y vive en una mansión silenciosa junto a su enorme gato blanco panzón. Reservada, educada y de voz suave.'
+          },
+          ayato: {
+            id: 'ayato',
+            isUser: false,
+            name: 'Ayato Fushimi',
+            handle: '@ayato_f',
+            role: 'Posgrado Biología • 23 años',
+            avatar: ayatoAv,
+            bio: 'Facultad de Ciencias.\nBiología celular & botánica.',
+            personality: 'Ayato Fushimi, 23 años, investigador de posgrado en Biología en la Facultad de Ciencias de Tokio. Conocido como el «príncipe de hielo» por su belleza afilada, mente analítica y serenidad distante. Mide 1,82 m, esbelto, piel pálida, cabello negro lacio, ojos oscuros profundos y lunar bajo el ojo izquierdo. Viste streetwear oscuro minimalista (chaqueta bomber, sudadera holgada, pantalones anchos) y bata blanca en el lab; siempre lleva un paraguas plegable extra y termo de acero. Creció en una familia acomodada y cariñosa con su hermana menor Hina, por lo que es emocionalmente maduro y respetuoso. Siente una fascinación tranquila por Moka Momose, cuidándola con gestos discretos sin invadir jamás su espacio. NUNCA usa emojis ni exclamaciones exageradas; habla con voz grave, pausada y sobria.'
+          },
+          hina: {
+            id: 'hina',
+            isUser: false,
+            name: 'Hina Fushimi',
+            handle: '@hina.chan',
+            role: 'Diseño & Moda • Hermana de Ayato',
+            avatar: hinaAv,
+            bio: 'Tokio ✨ dulces, ropa bonita y arrastrar a mi hermano de compras 🍰',
+            personality: 'Hina Fushimi, hermana menor de Ayato. Alegre, espontánea, observadora y muy cariñosa. Adora a su hermano mayor aunque sabe que en la universidad le dicen «príncipe de hielo», y siente mucha curiosidad y simpatía por Moka Momose, a quien encuentra preciosa y elegante. Usa emojis con naturalidad.'
+          },
+          campus: {
+            id: 'campus',
+            isUser: false,
+            name: 'Confesiones Campus Tokio',
+            handle: '@tokio_campus',
+            role: 'Página anónima universitaria',
+            avatar: campusAv,
+            bio: 'Secretos, avistamientos y confesiones anónimas entre Ciencias y Humanidades 🎓',
+            personality: 'Cuenta anónima de confesiones y rumores universitarios de Tokio. Publica en formato "Confesión #..." sobre rumores del campus, estudiantes misteriosos, el «príncipe de hielo» de Ciencias o tardes lluviosas en la biblioteca, manteniendo un tono intrigante y juvenil.'
+          }
+        },
+        notes: {
+          moka: { text: 'Repasando antes del parcial ☕', music: 'Lamp – Yume Utsutsu' },
+          ayato: { text: 'Cultivos celulares en el lab', music: '' },
+          hina: { text: 'Quiero taiyaki con crema 🐟✨', music: 'Ichiko Aoba – Porcelain' }
+        },
+        stories: [
+          {
+            id: 'st-1',
+            authorId: 'ayato',
+            image: makeSceneArt('lab'),
+            filter: 'filter-rain',
+            text: 'Lluvia sobre el invernadero de Ciencias.',
+            textPos: 'bottom-14',
+            location: 'Facultad de Ciencias',
+            showTime: true,
+            musicTitle: 'Arne',
+            musicArtist: 'Haruka Nakamura',
+            closeFriends: false,
+            timestamp: 'Hace 42 min',
+            seenBy: [],
+            likedBy: []
+          },
+          {
+            id: 'st-2',
+            authorId: 'hina',
+            image: makeSceneArt('sweets'),
+            filter: 'filter-warm',
+            text: '¿Por qué hace tanto frío en noviembre? 🌧️🍰',
+            textPos: 'top-14',
+            location: 'Shibuya, Tokio',
+            showTime: false,
+            musicTitle: 'Porcelain',
+            musicArtist: 'Ichiko Aoba',
+            closeFriends: false,
+            timestamp: 'Hace 1 h',
+            seenBy: [],
+            likedBy: []
+          }
+        ],
+        posts: [
+          {
+            id: 'post-1',
+            authorId: 'ayato',
+            image: makeSceneArt('train'),
+            aspect: '1:1',
+            filter: 'filter-night',
+            caption: 'Las líneas nocturnas de Tokio siempre parecen más silenciosas cuando llueve.',
+            location: 'Estación Ochanomizu',
+            timestamp: 'Anoche',
+            likes: ['hina', 'moka'],
+            savedBy: [],
+            comments: [
+              { id: 'c-1', authorId: 'hina', text: '¡Ayer volviste tardísimo otra vez! Te guardé pastelitos en la cocina 🍰', timestamp: 'Hace 9 h' }
+            ]
+          },
+          {
+            id: 'post-2',
+            authorId: 'campus',
+            image: makeSceneArt('library'),
+            aspect: '1:1',
+            filter: 'filter-rain',
+            caption: 'Confesión #418: Dicen que anoche vieron al «príncipe de hielo» de Ciencias caminando sin paraguas en su estación porque se lo prestó a alguien en el último tren. ¿Alguien confirma?',
+            location: 'Campus Central Tokio',
+            timestamp: 'Hace 2 h',
+            likes: ['hina'],
+            savedBy: [],
+            comments: [
+              { id: 'c-2', authorId: 'hina', text: '¿Qué?! Con razón llegó empapado anoche 👀', timestamp: 'Hace 1 h' }
+            ]
+          }
+        ],
+        dms: {
+          ayato: [
+            {
+              id: 'dm-1',
+              senderId: 'ayato',
+              text: 'No hace falta que te apresures a devolver el paraguas. Sigue lloviendo en todo Tokio y hoy anunciaron chubascos por la tarde.',
+              timestamp: '09:40'
+            }
+          ],
+          hina: [
+            {
+              id: 'dm-2',
+              senderId: 'hina',
+              text: '¡Hola Moka! Me encanta tu estilo, siempre pareces salida de una película ✨',
+              timestamp: 'Ayer'
+            }
+          ],
+          campus: []
+        },
+        bagItems: [
+          { id: 'bag-1', name: '📱 Tablet con ensayo del parcial', note: 'Faltan últimos detalles para las 16:00 hrs' },
+          { id: 'bag-2', name: '☂️ Paraguas negro de Ayato', note: 'Seco y doblado con prolijidad sobre la mesa' },
+          { id: 'bag-3', name: '💳 Tarjeta negra', note: 'Guardada en el tarjetero tras pagar el café' },
+          { id: 'bag-4', name: '🍵 Termo de acero con té blanco', note: 'Aún conserva el calor' },
+          { id: 'bag-5', name: '🎧 Auriculares minimalistas', note: 'Para aislar el ruido del campus' }
+        ],
+        storyMessages: [
+          {
+            id: 'sm-0',
+            type: 'scene_notice',
+            location: 'Cafetería Komorebi',
+            clock: '13:15',
+            weather: '🌧️ Lluvia 11°C'
+          },
+          {
+            id: 'sm-1',
+            type: 'narrator',
+            text: '*La lluvia fina de noviembre golpea con suavidad los amplios ventanales de la Cafetería Komorebi, a un par de calles de la universidad. Son las 13:15 hrs; Moka acaba de salir de su clase y tiene exactamente hasta las 16:00 hrs para pulir los últimos detalles de su ensayo e informe de parcial.*'
+          },
+          {
+            id: 'sm-2',
+            type: 'user',
+            isThought: false,
+            text: '*Tras pedir su bebida caliente de siempre, guardar su tarjeta negra en el bolso y acomodarse en su rincón habitual junto a la ventana, Moka deja su tablet encendida sobre la madera oscura. A un costado reposa el paraguas negro de Ayato, perfectamente seco y doblado, mientras ella rodea su taza tibia con ambas manos frías.*'
+          }
+        ]
+      };
+    }
+
+    let state = loadState();
+    let activeDMUserId = null;
+    let activeViewerUserId = null;
+    let activeViewerSlideIdx = 0;
+    let worldInputMode = 'action';
+    let postDraft = { image: '', aspect: '1:1', filter: 'filter-none' };
+    let dmDraftImage = '';
+    let storyStudioDraft = {
+      image: makeSceneArt('cafe'),
+      filter: 'filter-none',
+      locSticker: false,
+      timeSticker: false,
+      closeFriends: false
+    };
+    let toastAction = null;
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          return { ...buildDefaultState(), ...parsed };
+        }
+      } catch (e) { console.warn(e); }
+      return buildDefaultState();
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        showToast(state.characters.moka.avatar, 'Memoria llena', 'Exporta un respaldo JSON en 🔑 API o borra algún post antiguo.');
+      }
+    }
+
+    // ==================== WEB AUDIO API SYNTHESIZER (AMBIENT & STORY MUSIC) ====================
+    let audioCtx = null;
+    let ambientNode = null;
+    let ambientGain = null;
+    let ambientMode = 'off';
+    let ambientVolume = 0.35;
+
+    function ensureAudioCtx() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+      }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function toggleAmbientMenu() {
+      document.getElementById('ambient-popover').classList.toggle('hidden');
+    }
+
+    function setAmbientMode(mode) {
+      ambientMode = mode;
+      ['off', 'rain', 'cafe'].forEach(m => {
+        const btn = document.getElementById('amb-' + m);
+        btn.className = m === mode
+          ? 'py-1.5 rounded-lg bg-indigo-600 text-white font-medium'
+          : 'py-1.5 rounded-lg bg-zinc-900 text-zinc-400 hover:text-white';
+      });
+      document.getElementById('ambient-icon').textContent = mode === 'rain' ? '🌧️' : mode === 'cafe' ? '☕' : '🎧';
+      document.getElementById('ambient-label').textContent = mode === 'rain' ? 'Lluvia' : mode === 'cafe' ? 'Café' : 'Off';
+
+      if (ambientNode) {
+        try { ambientNode.stop(); ambientNode.disconnect(); } catch (e) {}
+        ambientNode = null;
+      }
+      if (mode === 'off') return;
+
+      ensureAudioCtx();
+      const bufferSize = audioCtx.sampleRate * 3;
+      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      let lastOut = 0.0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        data[i] = (lastOut + (0.04 * white)) / 1.04;
+        lastOut = data[i];
+        data[i] *= mode === 'rain' ? 2.6 : 1.8;
+      }
+
+      const noise = audioCtx.createBufferSource();
+      noise.buffer = buffer;
+      noise.loop = true;
+
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = mode === 'rain' ? 'bandpass' : 'lowpass';
+      filter.frequency.value = mode === 'rain' ? 950 : 380;
+      filter.Q.value = mode === 'rain' ? 0.65 : 0.9;
+
+      ambientGain = audioCtx.createGain();
+      ambientGain.gain.value = ambientVolume * 0.25;
+
+      noise.connect(filter);
+      filter.connect(ambientGain);
+      ambientGain.connect(audioCtx.destination);
+      noise.start();
+      ambientNode = noise;
+    }
+
+    function setAmbientVolume(val) {
+      ambientVolume = val / 100;
+      document.getElementById('amb-vol-text').textContent = val + '%';
+      if (ambientGain && audioCtx) {
+        ambientGain.gain.setTargetAtTime(ambientVolume * 0.25, audioCtx.currentTime, 0.05);
+      }
+    }
+
+    function playGentleMusicChime(seedText = 'Lamp') {
+      try {
+        ensureAudioCtx();
+        const scales = [
+          [261.63, 329.63, 392.00, 493.88],
+          [293.66, 349.23, 440.00, 523.25],
+          [220.00, 261.63, 329.63, 392.00]
+        ];
+        const idx = seedText.length % scales.length;
+        const notes = scales[idx];
+        const now = audioCtx.currentTime;
+        notes.forEach((freq, i) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + i * 0.28);
+          gain.gain.setValueAtTime(0.0001, now + i * 0.28);
+          gain.gain.exponentialRampToValueAtTime(0.045, now + i * 0.28 + 0.06);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.28 + 1.1);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now + i * 0.28);
+          osc.stop(now + i * 0.28 + 1.15);
+        });
+      } catch (e) {}
+    }
+
+    function previewStoryMusicSynth() {
+      const preset = document.getElementById('story-music-preset').value;
+      const custom = document.getElementById('story-music-custom-title').value;
+      playGentleMusicChime(custom || preset || 'Tokyo');
+    }
+
+    // ==================== IMAGE COMPRESSION UTILITY ====================
+    function compressImageFile(file, maxDim = 900, quality = 0.82) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const img = new Image();
+          img.onload = () => {
+            let w = img.width, h = img.height;
+            if (w > maxDim || h > maxDim) {
+              if (w > h) { h = Math.round(h * (maxDim / w)); w = maxDim; }
+              else { w = Math.round(w * (maxDim / h)); h = maxDim; }
+            }
+            const c = document.createElement('canvas');
+            c.width = w; c.height = h;
+            const ctx = c.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            resolve(c.toDataURL('image/jpeg', quality));
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Clipboard Paste Support
+    document.addEventListener('paste', async (e) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (const item of items) {
+        if (item.type.startsWith('image/')) {
+          const file = item.getAsFile();
+          const dataUrl = await compressImageFile(file);
+          if (!document.getElementById('modal-story-studio').classList.contains('hidden')) {
+            storyStudioDraft.image = dataUrl;
+            updateStoryPreview();
+          } else if (!document.getElementById('tab-create').classList.contains('hidden')) {
+            postDraft.image = dataUrl;
+            renderPostDraftPreview();
+          } else if (!document.getElementById('dm-chat-view').classList.contains('hidden')) {
+            dmDraftImage = dataUrl;
+            document.getElementById('dm-img-preview').src = dataUrl;
+            document.getElementById('dm-img-preview-bar').classList.remove('hidden');
+          }
+        }
+      }
+    });
+
+    // ==================== GEMINI API CALLER (WITH FALLBACK) ====================
+    async function callGemini(systemInstruction, userPrompt, imageDataUrl = null, expectJson = false) {
+      const key = (state.apiKey || '').trim();
+      if (!key) return null;
+
+      const models = [state.model || 'gemini-2.5-flash', 'gemini-2.0-flash'];
+      const parts = [{ text: userPrompt }];
+
+      if (imageDataUrl && imageDataUrl.startsWith('data:image/')) {
+        const [meta, b64] = imageDataUrl.split(',');
+        const mimeType = meta.match(/data:(.*?);/)[1] || 'image/jpeg';
+        parts.push({ inline_data: { mime_type: mimeType, data: b64 } });
+      }
+
+      const body = {
+        system_instruction: { parts: [{ text: systemInstruction }] },
+        contents: [{ role: 'user', parts }],
+        generationConfig: {
+          temperature: 0.85,
+          maxOutputTokens: 900,
+          ...(expectJson ? { responseMimeType: 'application/json' } : {})
+        }
+      };
+
+      for (const model of models) {
+        try {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+          });
+          if (!res.ok) continue;
+          const data = await res.json();
+          const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (text) return text.trim();
+        } catch (err) {
+          console.warn('Gemini error on', model, err);
+        }
+      }
+      return null;
+    }
+
+    function buildWorldContextSummary() {
+      const recentStory = state.storyMessages.slice(-6).map(m => {
+        if (m.type === 'scene_notice') return `[Cambio de escenario a: ${m.location} (${m.clock}, ${m.weather})]`;
+        if (m.type === 'sync_notice') return `[Actividad en red social: ${m.text}]`;
+        if (m.isThought) return `[Pensamiento privado de Moka - NO audible por otros: ${m.text}]`;
+        return `${m.type === 'user' ? 'Moka' : 'Narración'}: ${m.text}`;
+      }).join('\n');
+
+      const bagSummary = state.bagItems.map(b => `${b.name} (${b.note})`).join(', ');
+      return `Escenario actual: ${state.currentScene} | Hora en Tokio: ${state.clock} hrs | Clima: ${state.weather}.\nObjetos en el bolso/mesa de Moka: ${bagSummary}.\nÚltimos acontecimientos en Vida Exterior:\n${recentStory}`;
+    }
+
+    // ==================== VIEW MODE & NAVIGATION ====================
+    function setViewMode(mode) {
+      state.viewMode = mode;
+      saveState();
+      const phone = document.getElementById('pane-phone');
+      const world = document.getElementById('pane-world');
+
+      ['phone', 'world', 'split'].forEach(m => {
+        const btn = document.getElementById('btn-mode-' + m);
+        if (!btn) return;
+        btn.className = m === mode
+          ? (m === 'split' ? 'hidden lg:inline-flex px-3 py-1 rounded-full font-medium transition bg-zinc-800 text-white' : 'px-3 py-1 rounded-full font-medium transition bg-zinc-800 text-white')
+          : (m === 'split' ? 'hidden lg:inline-flex px-3 py-1 rounded-full font-medium transition text-zinc-400 hover:text-white' : 'px-3 py-1 rounded-full font-medium transition text-zinc-400 hover:text-white');
+      });
+
+      if (mode === 'phone') {
+        phone.classList.remove('hidden');
+        phone.classList.add('mx-auto');
+        world.classList.add('hidden');
+        world.classList.remove('flex', 'lg:flex');
+      } else if (mode === 'world') {
+        phone.classList.add('hidden');
+        world.classList.remove('hidden');
+        world.classList.add('flex');
+      } else {
+        phone.classList.remove('hidden', 'mx-auto');
+        world.classList.remove('hidden');
+        world.classList.add('flex');
+      }
+    }
+
+    function switchPhoneTab(tab) {
+      ['feed', 'explore', 'create', 'dm', 'profile'].forEach(t => {
+        document.getElementById('tab-' + t).classList.toggle('hidden', t !== tab);
+        const nav = document.getElementById('nav-' + t);
+        if (nav && t !== 'profile') {
+          nav.classList.toggle('text-white', t === tab);
+          nav.classList.toggle('text-zinc-500', t !== tab);
+        }
+      });
+      if (tab === 'feed') renderFeed();
+      if (tab === 'explore') renderOCList();
+      if (tab === 'create') prepareCreateTab();
+      if (tab === 'dm') renderDMView();
+      if (tab === 'profile') renderProfileTab();
+    }
+
+    function openOwnProfile() {
+      state.activeProfileId = 'moka';
+      switchPhoneTab('profile');
+    }
+
+    function openUserProfile(charId) {
+      state.activeProfileId = charId;
+      switchPhoneTab('profile');
+    }
+
+    // ==================== STORIES SYSTEM (STUDIO + VIEWER + MUSIC) ====================
+    function renderStoriesTray() {
+      const tray = document.getElementById('stories-tray');
+      const moka = state.characters.moka;
+      const mokaStories = state.stories.filter(s => s.authorId === 'moka');
+
+      let html = `
+        <div class="flex flex-col items-center gap-1 shrink-0 cursor-pointer" onclick="${mokaStories.length ? "openStoryViewer('moka')" : "openStoryStudio()"}">
+          <div class="relative">
+            <div class="${mokaStories.length ? 'story-ring' : ''}">
+              <div class="story-ring-inner">
+                <img src="${moka.avatar}" class="w-14 h-14 rounded-full object-cover" />
+              </div>
+            </div>
+            <button onclick="event.stopPropagation(); openStoryStudio()" class="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-indigo-500 border-2 border-black text-white text-xs font-bold flex items-center justify-center">+</button>
+          </div>
+          <span class="text-[11px] text-zinc-300 w-16 truncate text-center">Tu historia</span>
+        </div>
+      `;
+
+      Object.values(state.characters).filter(c => c.id !== 'moka').forEach(char => {
+        const charStories = state.stories.filter(s => s.authorId === char.id);
+        if (!charStories.length) return;
+        const hasCF = charStories.some(s => s.closeFriends);
+        const allSeen = charStories.every(s => s.seenBy.includes('moka'));
+        const ringClass = allSeen ? 'story-ring seen' : (hasCF ? 'story-ring close-friends' : 'story-ring');
+
+        html += `
+          <div class="flex flex-col items-center gap-1 shrink-0 cursor-pointer" onclick="openStoryViewer('${char.id}')">
+            <div class="${ringClass}">
+              <div class="story-ring-inner">
+                <img src="${char.avatar}" class="w-14 h-14 rounded-full object-cover" />
+              </div>
+            </div>
+            <span class="text-[11px] text-zinc-300 w-16 truncate text-center">${char.handle.replace('@', '')}</span>
+          </div>
+        `;
+      });
+
+      tray.innerHTML = html;
+    }
+
+    function openStoryStudio() {
+      storyStudioDraft = {
+        image: makeSceneArt('cafe'),
+        filter: 'filter-none',
+        locSticker: false,
+        timeSticker: false,
+        closeFriends: false
+      };
+      document.getElementById('story-text-input').value = '';
+      document.getElementById('story-music-preset').value = '';
+      document.getElementById('story-custom-music-fields').classList.add('hidden');
+      document.getElementById('story-music-custom-title').value = '';
+      document.getElementById('story-music-custom-artist').value = '';
+      document.getElementById('btn-st-loc').className = 'px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400';
+      document.getElementById('btn-st-time').className = 'px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400';
+      document.getElementById('btn-story-audience').textContent = '🌐 Todos';
+      document.getElementById('btn-story-audience').className = 'px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-200 font-medium';
+      updateStoryPreview();
+      openModal('modal-story-studio');
+    }
+
+    async function handleStoryImageSelect(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      storyStudioDraft.image = await compressImageFile(file, 900, 0.84);
+      updateStoryPreview();
+    }
+
+    function applyStoryPreset(preset) {
+      storyStudioDraft.image = makeSceneArt(preset);
+      updateStoryPreview();
+    }
+
+    function toggleStorySticker(type) {
+      if (type === 'loc') {
+        storyStudioDraft.locSticker = !storyStudioDraft.locSticker;
+        document.getElementById('btn-st-loc').className = storyStudioDraft.locSticker
+          ? 'px-2.5 py-1 rounded-full bg-indigo-600 text-white font-medium'
+          : 'px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400';
+      } else {
+        storyStudioDraft.timeSticker = !storyStudioDraft.timeSticker;
+        document.getElementById('btn-st-time').className = storyStudioDraft.timeSticker
+          ? 'px-2.5 py-1 rounded-full bg-indigo-600 text-white font-medium'
+          : 'px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400';
+      }
+      updateStoryPreview();
+    }
+
+    function toggleStoryAudience() {
+      storyStudioDraft.closeFriends = !storyStudioDraft.closeFriends;
+      const btn = document.getElementById('btn-story-audience');
+      if (storyStudioDraft.closeFriends) {
+        btn.textContent = '⭐ Mejores amigos';
+        btn.className = 'px-2.5 py-1 rounded-full bg-emerald-600 text-black font-semibold';
+      } else {
+        btn.textContent = '🌐 Todos';
+        btn.className = 'px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-200 font-medium';
+      }
+    }
+
+    function onStoryMusicPresetChange() {
+      const val = document.getElementById('story-music-preset').value;
+      document.getElementById('story-custom-music-fields').classList.toggle('hidden', val !== 'custom');
+      updateStoryPreview();
+      if (val && val !== 'custom') playGentleMusicChime(val);
+    }
+
+    function getSelectedStoryMusic() {
+      const preset = document.getElementById('story-music-preset').value;
+      if (!preset) return { title: '', artist: '' };
+      if (preset === 'custom') {
+        return {
+          title: document.getElementById('story-music-custom-title').value.trim(),
+          artist: document.getElementById('story-music-custom-artist').value.trim() || 'Tokio FM'
+        };
+      }
+      const [title, artist] = preset.split('|');
+      return { title, artist };
+    }
+
+    function updateStoryPreview() {
+      const img = document.getElementById('story-studio-img');
+      const filter = document.getElementById('story-filter-select').value;
+      storyStudioDraft.filter = filter;
+      img.src = storyStudioDraft.image;
+      img.className = `absolute inset-0 w-full h-full object-cover ${filter}`;
+
+      const locEl = document.getElementById('preview-sticker-loc');
+      locEl.textContent = `📍 ${state.currentScene}`;
+      locEl.classList.toggle('hidden', !storyStudioDraft.locSticker);
+
+      const timeEl = document.getElementById('preview-sticker-time');
+      timeEl.textContent = `🕒 ${state.clock} • ${state.weather}`;
+      timeEl.classList.toggle('hidden', !storyStudioDraft.timeSticker);
+
+      const txt = document.getElementById('story-text-input').value.trim();
+      const pos = document.getElementById('story-text-pos').value;
+      const txtEl = document.getElementById('preview-story-text');
+      txtEl.textContent = txt;
+      txtEl.className = `absolute inset-x-3 z-10 text-center px-2.5 py-1.5 rounded-xl text-xs font-medium text-white bg-black/55 backdrop-blur-sm ${pos} ${txt ? '' : 'hidden'}`;
+
+      const music = getSelectedStoryMusic();
+      const musicEl = document.getElementById('preview-sticker-music');
+      if (music.title) {
+        document.getElementById('preview-music-title').textContent = music.title;
+        document.getElementById('preview-music-artist').textContent = music.artist;
+        musicEl.classList.remove('hidden');
+      } else {
+        musicEl.classList.add('hidden');
+      }
+    }
+
+    async function publishStory() {
+      const text = document.getElementById('story-text-input').value.trim();
+      const textPos = document.getElementById('story-text-pos').value;
+      const music = getSelectedStoryMusic();
+
+      const newStory = {
+        id: 'st-' + Date.now(),
+        authorId: 'moka',
+        image: storyStudioDraft.image,
+        filter: storyStudioDraft.filter,
+        text,
+        textPos,
+        location: storyStudioDraft.locSticker ? state.currentScene : '',
+        showTime: storyStudioDraft.timeSticker,
+        musicTitle: music.title,
+        musicArtist: music.artist,
+        closeFriends: storyStudioDraft.closeFriends,
+        timestamp: 'Ahora mismo',
+        seenBy: ['ayato', 'hina'],
+        likedBy: []
+      };
+
+      state.stories.unshift(newStory);
+      addSyncNoticeToWorld(`Moka subió una historia${text ? ` («${text}»)` : ''}${music.title ? ` con música: ${music.title}` : ''}.`);
+      saveState();
+      closeModal('modal-story-studio');
+      renderStoriesTray();
+
+      // AI reaction to Moka's story
+      reactToMokaStory(newStory);
+    }
+
+    async function reactToMokaStory(story) {
+      const ayato = state.characters.ayato;
+      const hina = state.characters.hina;
+      const worldCtx = buildWorldContextSummary();
+
+      const sys = `Eres el simulador de respuestas de Instagram para Ayato Fushimi y Hina Fushimi en Tokio.
+${ayato.personality}
+${hina.personality}
+Contexto actual:
+${worldCtx}
+Responde SIEMPRE en JSON válido con este formato exacto:
+{"ayatoLikes": true, "hinaLikes": true, "responderId": "ayato" o "hina", "dmReply": "mensaje corto acorde a su personalidad"}`;
+
+      const prompt = `Moka Momose acaba de subir una historia a Instagram${story.closeFriends ? ' (solo Mejores Amigos)' : ''}.
+Texto en historia: "${story.text || '(sin texto)'}"
+Ubicación: "${story.location || 'no indicada'}"
+Música: "${story.musicTitle ? story.musicTitle + ' - ' + story.musicArtist : 'ninguna'}"
+Analiza la imagen adjunta y genera si dan Me gusta y un mensaje privado corto de uno de ellos respondiendo a su historia.`;
+
+      const raw = await callGemini(sys, prompt, story.image, true);
+      let data = null;
+      if (raw) {
+        try { data = JSON.parse(raw); } catch (e) {}
+      }
+
+      if (!data) {
+        data = {
+          ayatoLikes: true,
+          hinaLikes: true,
+          responderId: 'ayato',
+          dmReply: story.location.includes('Komorebi')
+            ? 'Veo que sigues repasando antes del parcial. No olvides abrigarte al salir.'
+            : 'Ten cuidado con la lluvia al regresar.'
+        };
+      }
+
+      const targetStory = state.stories.find(s => s.id === story.id);
+      if (targetStory) {
+        if (data.ayatoLikes && !targetStory.likedBy.includes('ayato')) targetStory.likedBy.push('ayato');
+        if (data.hinaLikes && !targetStory.likedBy.includes('hina')) targetStory.likedBy.push('hina');
+      }
+
+      const senderId = state.characters[data.responderId] ? data.responderId : 'ayato';
+      if (data.dmReply) {
+        pushDM(senderId, {
+          id: 'dm-' + Date.now(),
+          senderId,
+          text: data.dmReply,
+          storyThumb: story.image,
+          timestamp: state.clock
+        });
+      }
+      saveState();
+    }
+
+    function openStoryViewer(userId) {
+      const userStories = state.stories.filter(s => s.authorId === userId);
+      if (!userStories.length) return;
+      activeViewerUserId = userId;
+      activeViewerSlideIdx = 0;
+      renderStorySlide();
+      openModal('modal-story-viewer');
+    }
+
+    function renderStorySlide() {
+      const userStories = state.stories.filter(s => s.authorId === activeViewerUserId);
+      if (!userStories.length) { closeStoryViewer(); return; }
+      if (activeViewerSlideIdx >= userStories.length) { closeStoryViewer(); return; }
+
+      const slide = userStories[activeViewerSlideIdx];
+      const author = state.characters[slide.authorId];
+      if (!slide.seenBy.includes('moka')) {
+        slide.seenBy.push('moka');
+        saveState();
+        renderStoriesTray();
+      }
+
+      // Progress bars
+      document.getElementById('viewer-progress-bars').innerHTML = userStories.map((_, idx) => `
+        <div class="h-0.5 flex-1 rounded-full ${idx <= activeViewerSlideIdx ? 'bg-white' : 'bg-white/30'}"></div>
+      `).join('');
+
+      const bg = document.getElementById('viewer-bg-img');
+      bg.src = slide.image;
+      bg.className = `absolute inset-0 w-full h-full object-cover ${slide.filter || 'filter-none'}`;
+
+      document.getElementById('viewer-avatar').src = author.avatar;
+      document.getElementById('viewer-username').textContent = author.handle;
+      document.getElementById('viewer-time').textContent = slide.timestamp;
+      document.getElementById('viewer-cf-badge').classList.toggle('hidden', !slide.closeFriends);
+
+      // Stickers
+      let stickersHtml = '';
+      if (slide.location) stickersHtml += `<span class="px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-[10px] text-white border border-white/15">📍 ${slide.location}</span>`;
+      if (slide.showTime) stickersHtml += `<span class="px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-[10px] text-white border border-white/15">🕒 ${state.clock} • ${state.weather}</span>`;
+      document.getElementById('viewer-stickers-row').innerHTML = stickersHtml;
+
+      const txtEl = document.getElementById('viewer-floating-text');
+      txtEl.textContent = slide.text || '';
+      txtEl.classList.toggle('hidden', !slide.text);
+
+      const musicBar = document.getElementById('viewer-music-bar');
+      if (slide.musicTitle) {
+        document.getElementById('viewer-music-text').textContent = `${slide.musicTitle} • ${slide.musicArtist || 'Tokio'}`;
+        musicBar.classList.remove('hidden');
+        playGentleMusicChime(slide.musicTitle);
+      } else {
+        musicBar.classList.add('hidden');
+      }
+
+      const isOwn = slide.authorId === 'moka';
+      document.getElementById('viewer-own-footer').classList.toggle('hidden', !isOwn);
+      document.getElementById('viewer-reply-footer').classList.toggle('hidden', isOwn);
+      document.getElementById('viewer-seen-drawer').classList.add('hidden');
+
+      if (isOwn) {
+        document.getElementById('viewer-seen-count').textContent = `Visto por ${slide.seenBy.length} • ❤️ ${slide.likedBy.length}`;
+      }
+    }
+
+    function nextStorySlide() {
+      const userStories = state.stories.filter(s => s.authorId === activeViewerUserId);
+      if (activeViewerSlideIdx + 1 < userStories.length) {
+        activeViewerSlideIdx++;
+        renderStorySlide();
+      } else {
+        closeStoryViewer();
+      }
+    }
+
+    function prevStorySlide() {
+      if (activeViewerSlideIdx > 0) {
+        activeViewerSlideIdx--;
+        renderStorySlide();
+      }
+    }
+
+    function closeStoryViewer() {
+      closeModal('modal-story-viewer');
+      activeViewerUserId = null;
+    }
+
+    function toggleStoryViewersList() {
+      const drawer = document.getElementById('viewer-seen-drawer');
+      drawer.classList.toggle('hidden');
+      if (drawer.classList.contains('hidden')) return;
+
+      const userStories = state.stories.filter(s => s.authorId === 'moka');
+      const slide = userStories[activeViewerSlideIdx];
+      if (!slide) return;
+
+      drawer.innerHTML = slide.seenBy.map(uid => {
+        const c = state.characters[uid];
+        if (!c) return '';
+        const liked = slide.likedBy.includes(uid);
+        return `
+          <div class="flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2">
+              <img src="${c.avatar}" class="w-6 h-6 rounded-full object-cover" />
+              <span class="text-zinc-200">${c.name}</span>
+            </div>
+            <span>${liked ? '❤️' : '👁️'}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function deleteCurrentStory() {
+      const userStories = state.stories.filter(s => s.authorId === 'moka');
+      const slide = userStories[activeViewerSlideIdx];
+      if (!slide) return;
+      state.stories = state.stories.filter(s => s.id !== slide.id);
+      saveState();
+      renderStoriesTray();
+      closeStoryViewer();
+    }
+
+    async function reactToStory(emoji) {
+      const userStories = state.stories.filter(s => s.authorId === activeViewerUserId);
+      const slide = userStories[activeViewerSlideIdx];
+      if (!slide) return;
+      const targetId = slide.authorId;
+      closeStoryViewer();
+      openDMThread(targetId);
+      await sendDMMessage(`Reaccionó ${emoji} a tu historia`, slide.image);
+    }
+
+    async function sendStoryReply() {
+      const input = document.getElementById('viewer-reply-input');
+      const txt = input.value.trim();
+      if (!txt) return;
+      const userStories = state.stories.filter(s => s.authorId === activeViewerUserId);
+      const slide = userStories[activeViewerSlideIdx];
+      const targetId = slide.authorId;
+      input.value = '';
+      closeStoryViewer();
+      openDMThread(targetId);
+      await sendDMMessage(`Respondió a tu historia: "${txt}"`, slide.image);
+    }
+
+    async function generateAIStory() {
+      const btn = document.getElementById('btn-gen-ai-story');
+      btn.textContent = '⏳...';
+      const candidates = Object.values(state.characters).filter(c => c.id !== 'moka');
+      const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+
+      const sys = `Eres ${chosen.name} (${chosen.handle}). ${chosen.personality}
+Contexto actual: ${buildWorldContextSummary()}
+Genera una historia corta de Instagram (máximo 90 caracteres) y opcionalmente una canción. Responde en JSON: {"text":"...", "location":"...", "musicTitle":"...", "musicArtist":"..."}`;
+
+      const raw = await callGemini(sys, 'Crea una historia nueva para tu perfil ahora mismo.', null, true);
+      let data = null;
+      if (raw) { try { data = JSON.parse(raw); } catch (e) {} }
+      if (!data) {
+        data = chosen.id === 'ayato'
+          ? { text: 'Tarde gris sobre la biblioteca central.', location: 'Campus Tokio', musicTitle: 'Arne', musicArtist: 'Haruka Nakamura' }
+          : { text: '¡Necesito un café dulce urgente! ☕✨', location: 'Tokio', musicTitle: 'Porcelain', musicArtist: 'Ichiko Aoba' };
+      }
+
+      const themes = ['cafe', 'train', 'library', 'lab', 'sweets'];
+      state.stories.unshift({
+        id: 'st-' + Date.now(),
+        authorId: chosen.id,
+        image: makeSceneArt(themes[Math.floor(Math.random() * themes.length)]),
+        filter: 'filter-rain',
+        text: data.text,
+        textPos: 'bottom-14',
+        location: data.location || 'Tokio',
+        showTime: true,
+        musicTitle: data.musicTitle || '',
+        musicArtist: data.musicArtist || '',
+        closeFriends: false,
+        timestamp: 'Ahora',
+        seenBy: [],
+        likedBy: []
+      });
+      saveState();
+      btn.textContent = '✨ Historia IA';
+      renderStoriesTray();
+      openStoryViewer(chosen.id);
+    }
+
+    // ==================== FEED, POSTS, @MENTIONS, RUMORS & DELETE ====================
+    function renderFeed() {
+      renderStoriesTray();
+      const box = document.getElementById('feed-posts');
+      if (!state.posts.length) {
+        box.innerHTML = `<div class="p-10 text-center text-xs text-zinc-500">No hay publicaciones aún. Sube una foto o pulsa «Simular campus».</div>`;
+        return;
+      }
+
+      box.innerHTML = state.posts.map(post => {
+        const author = state.characters[post.authorId] || state.characters.moka;
+        const liked = post.likes.includes('moka');
+        const saved = post.savedBy.includes('moka');
+        const aspectClass = post.aspect === '4:5' ? 'aspect-[4/5]' : 'aspect-square';
+
+        const commentsHtml = post.comments.map(c => {
+          const ca = state.characters[c.authorId] || state.characters.moka;
+          return `
+            <div class="text-xs leading-snug">
+              <span onclick="openUserProfile('${ca.id}')" class="font-semibold text-white cursor-pointer hover:underline">${ca.handle.replace('@', '')}</span>
+              <span class="text-zinc-300 ml-1">${formatMentions(c.text)}</span>
+            </div>
+          `;
+        }).join('');
+
+        return `
+          <article class="pb-3 bg-black" id="article-${post.id}">
+            <!-- Post Header -->
+            <div class="px-3 py-2.5 flex items-center justify-between">
+              <div class="flex items-center gap-2.5 cursor-pointer" onclick="openUserProfile('${author.id}')">
+                <img src="${author.avatar}" class="w-8 h-8 rounded-full object-cover border border-zinc-800" />
+                <div>
+                  <div class="text-xs font-semibold text-white leading-tight">${author.handle.replace('@', '')}</div>
+                  ${post.location ? `<div class="text-[10px] text-zinc-400">${post.location}</div>` : ''}
+                </div>
+              </div>
+
+              <!-- Inline Delete Confirmation -->
+              <div class="flex items-center gap-1" id="del-controls-${post.id}">
+                <button onclick="askDeletePost('${post.id}')" class="text-zinc-500 hover:text-rose-400 p-1 text-xs transition" title="Eliminar publicación">🗑️</button>
+              </div>
+            </div>
+
+            <!-- Post Image (Double tap to like) -->
+            <div ondblclick="doubleTapLike('${post.id}')" class="relative w-full ${aspectClass} bg-zinc-950 overflow-hidden cursor-pointer">
+              <img src="${post.image}" class="w-full h-full object-cover ${post.filter || 'filter-none'}" />
+              <div id="heart-anim-${post.id}" class="hidden absolute inset-0 flex items-center justify-center pointer-events-none">
+                <span class="text-6xl drop-shadow-2xl heart-burst">❤️</span>
+              </div>
+            </div>
+
+            <!-- Action Bar -->
+            <div class="px-3 pt-2.5 flex items-center justify-between">
+              <div class="flex items-center gap-3.5">
+                <button onclick="toggleLikePost('${post.id}')" class="text-lg transition transform active:scale-125 ${liked ? 'text-rose-500' : 'text-zinc-200 hover:text-zinc-400'}">
+                  ${liked ? '❤️' : '🤍'}
+                </button>
+                <button onclick="document.getElementById('comment-input-${post.id}').focus()" class="text-zinc-200 hover:text-zinc-400 text-base">💬</button>
+                <button onclick="openSharePostModal('${post.id}')" class="text-zinc-200 hover:text-zinc-400 text-base">✈️</button>
+              </div>
+              <button onclick="toggleSavePost('${post.id}')" class="text-base ${saved ? 'text-amber-400' : 'text-zinc-300 hover:text-white'}">
+                ${saved ? '🔖' : '📑'}
+              </button>
+            </div>
+
+            <!-- Likes & Caption -->
+            <div class="px-3 pt-1.5 space-y-1">
+              <div class="text-xs font-semibold text-white">${post.likes.length} Me gusta</div>
+              <div class="text-xs text-zinc-200 leading-relaxed">
+                <span onclick="openUserProfile('${author.id}')" class="font-semibold text-white cursor-pointer mr-1">${author.handle.replace('@', '')}</span>
+                ${formatMentions(post.caption)}
+              </div>
+              <div class="text-[10px] text-zinc-500 uppercase">${post.timestamp}</div>
+            </div>
+
+            <!-- Comments -->
+            <div class="px-3 pt-2 space-y-1.5">
+              ${commentsHtml}
+              <div class="flex items-center gap-1.5 pt-1">
+                <input type="text" id="comment-input-${post.id}" onkeydown="if(event.key==='Enter') submitPostComment('${post.id}')" placeholder="Añade un comentario o @menciona..." class="flex-1 bg-transparent text-xs text-white placeholder-zinc-500 outline-none py-1" />
+                <button onclick="submitPostComment('${post.id}')" class="text-xs font-semibold text-indigo-400 hover:text-indigo-300">Publicar</button>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    function formatMentions(text) {
+      return (text || '').replace(/(@[a-zA-Z0-9_.]+)/g, '<span class="text-indigo-400 font-medium">$1</span>');
+    }
+
+    function askDeletePost(postId) {
+      const box = document.getElementById('del-controls-' + postId);
+      if (!box) return;
+      box.innerHTML = `
+        <button onclick="confirmDeletePost('${postId}')" class="px-2 py-0.5 rounded bg-rose-600 text-white text-[11px] font-medium">Eliminar</button>
+        <button onclick="renderFeed()" class="px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 text-[11px]">Cancelar</button>
+      `;
+    }
+
+    function confirmDeletePost(postId) {
+      state.posts = state.posts.filter(p => p.id !== postId);
+      saveState();
+      renderFeed();
+      if (!document.getElementById('tab-profile').classList.contains('hidden')) renderProfileTab();
+    }
+
+    function doubleTapLike(postId) {
+      const post = state.posts.find(p => p.id === postId);
+      if (!post) return;
+      if (!post.likes.includes('moka')) post.likes.push('moka');
+      saveState();
+      renderFeed();
+      const anim = document.getElementById('heart-anim-' + postId);
+      if (anim) {
+        anim.classList.remove('hidden');
+        setTimeout(() => anim.classList.add('hidden'), 850);
+      }
+    }
+
+    function toggleLikePost(postId) {
+      const post = state.posts.find(p => p.id === postId);
+      if (!post) return;
+      const idx = post.likes.indexOf('moka');
+      if (idx >= 0) post.likes.splice(idx, 1);
+      else post.likes.push('moka');
+      saveState();
+      renderFeed();
+    }
+
+    function toggleSavePost(postId) {
+      const post = state.posts.find(p => p.id === postId);
+      if (!post) return;
+      const idx = post.savedBy.indexOf('moka');
+      if (idx >= 0) post.savedBy.splice(idx, 1);
+      else post.savedBy.push('moka');
+      saveState();
+      renderFeed();
+    }
+
+    async function submitPostComment(postId) {
+      const input = document.getElementById('comment-input-' + postId);
+      const txt = input.value.trim();
+      if (!txt) return;
+      const post = state.posts.find(p => p.id === postId);
+      if (!post) return;
+
+      post.comments.push({
+        id: 'c-' + Date.now(),
+        authorId: 'moka',
+        text: txt,
+        timestamp: 'Ahora'
+      });
+      input.value = '';
+      saveState();
+      renderFeed();
+
+      // Determine who responds (tagged @handle or post author)
+      const mentioned = Object.values(state.characters).find(c => c.id !== 'moka' && txt.toLowerCase().includes(c.handle.toLowerCase()));
+      const responder = mentioned || (post.authorId !== 'moka' ? state.characters[post.authorId] : state.characters.ayato);
+
+      if (responder) {
+        const sys = `Eres ${responder.name} (${responder.handle}). ${responder.personality}
+Contexto actual: ${buildWorldContextSummary()}
+Responde con un comentario breve (1 oración) al comentario de Moka Momose en esta publicación de Instagram.`;
+        const reply = await callGemini(sys, `Publicación: "${post.caption}". Moka comentó: "${txt}". Escribe tu respuesta como comentario.`);
+        if (reply) {
+          post.comments.push({
+            id: 'c-' + (Date.now() + 1),
+            authorId: responder.id,
+            text: reply.replace(/^["']|["']$/g, ''),
+            timestamp: 'Ahora'
+          });
+          saveState();
+          renderFeed();
+        }
+      }
+    }
+
+    // ==================== CREATE POST TAB ====================
+    function prepareCreateTab() {
+      const sel = document.getElementById('post-author-select');
+      sel.innerHTML = Object.values(state.characters).map(c => `<option value="${c.id}" ${c.id === 'moka' ? 'selected' : ''}>Publicar como ${c.handle}</option>`).join('');
+
+      const chips = document.getElementById('post-mention-chips');
+      chips.innerHTML = Object.values(state.characters).filter(c => c.id !== 'moka').map(c => `
+        <button type="button" onclick="appendPostMention('${c.handle}')" class="px-2 py-0.5 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-[11px] text-indigo-300 shrink-0">${c.handle}</button>
+      `).join('');
+    }
+
+    function appendPostMention(handle) {
+      const ta = document.getElementById('post-caption-input');
+      ta.value = (ta.value ? ta.value + ' ' : '') + handle + ' ';
+      ta.focus();
+    }
+
+    async function handlePostImageSelect(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      postDraft.image = await compressImageFile(file, 960, 0.84);
+      renderPostDraftPreview();
+    }
+
+    function renderPostDraftPreview() {
+      const wrap = document.getElementById('post-preview-wrap');
+      const empty = document.getElementById('post-preview-empty');
+      const img = document.getElementById('post-preview-img');
+      if (!postDraft.image) {
+        wrap.classList.add('hidden');
+        empty.classList.remove('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+      wrap.classList.remove('hidden');
+      wrap.className = `relative mx-auto overflow-hidden rounded-xl bg-zinc-900 ${postDraft.aspect === '4:5' ? 'aspect-[4/5] max-w-[260px]' : 'aspect-square max-w-[300px]'}`;
+      img.src = postDraft.image;
+      img.className = `w-full h-full object-cover transition-all duration-300 ${postDraft.filter}`;
+    }
+
+    function clearPostImage() {
+      postDraft.image = '';
+      renderPostDraftPreview();
+    }
+
+    function setPostAspect(asp) {
+      postDraft.aspect = asp;
+      document.getElementById('aspect-1-1').className = asp === '1:1' ? 'px-2.5 py-1 rounded bg-zinc-800 text-white font-medium' : 'px-2.5 py-1 rounded text-zinc-400';
+      document.getElementById('aspect-4-5').className = asp === '4:5' ? 'px-2.5 py-1 rounded bg-zinc-800 text-white font-medium' : 'px-2.5 py-1 rounded text-zinc-400';
+      renderPostDraftPreview();
+    }
+
+    function setPostFilter(cls, btn) {
+      postDraft.filter = cls;
+      document.querySelectorAll('.post-filter-btn').forEach(b => b.className = 'post-filter-btn px-2.5 py-1 rounded-full bg-zinc-900 text-zinc-400 text-[11px]');
+      btn.className = 'post-filter-btn px-2.5 py-1 rounded-full bg-indigo-600 text-white text-[11px]';
+      renderPostDraftPreview();
+    }
+
+    async function publishPost() {
+      const authorId = document.getElementById('post-author-select').value || 'moka';
+      const caption = document.getElementById('post-caption-input').value.trim();
+      const location = document.getElementById('post-location-input').value.trim();
+      const image = postDraft.image || makeSceneArt('cafe');
+
+      const newPost = {
+        id: 'post-' + Date.now(),
+        authorId,
+        image,
+        aspect: postDraft.aspect,
+        filter: postDraft.filter,
+        caption: caption || '...',
+        location: location || state.currentScene,
+        timestamp: 'Ahora mismo',
+        likes: [],
+        savedBy: [],
+        comments: []
+      };
+
+      state.posts.unshift(newPost);
+      if (authorId === 'moka') {
+        addSyncNoticeToWorld(`Moka publicó una foto en Instagram${caption ? `: «${caption}»` : ''}.`);
+      }
+      saveState();
+
+      // Reset draft & switch to feed
+      postDraft.image = '';
+      document.getElementById('post-caption-input').value = '';
+      document.getElementById('post-location-input').value = '';
+      renderPostDraftPreview();
+      switchPhoneTab('feed');
+
+      // Generate multimodal AI reactions
+      generatePostReactions(newPost);
+    }
+
+    async function generatePostReactions(post) {
+      const mentioned = Object.values(state.characters).filter(c => c.id !== post.authorId && post.caption.toLowerCase().includes(c.handle.toLowerCase()));
+      const responders = mentioned.length ? mentioned : [state.characters.hina, state.characters.ayato].filter(c => c && c.id !== post.authorId);
+
+      const profilesDesc = responders.map(r => `- ${r.id} (${r.name}, ${r.handle}): ${r.personality}`).join('\n');
+      const sys = `Eres el motor de comentarios de Instagram en Tokio. Analiza la foto y el pie de foto, y genera reacciones realistas de los siguientes personajes:\n${profilesDesc}\nContexto actual: ${buildWorldContextSummary()}\nResponde SIEMPRE en JSON válido: {"likes":["ayato","hina"], "comments":[{"authorId":"hina","text":"..."}]}`;
+
+      const raw = await callGemini(sys, `Autor: ${state.characters[post.authorId]?.name}. Pie de foto: "${post.caption}". Ubicación: "${post.location}".`, post.image, true);
+      let data = null;
+      if (raw) { try { data = JSON.parse(raw); } catch (e) {} }
+      if (!data) {
+        data = {
+          likes: ['ayato', 'hina'],
+          comments: [
+            { authorId: 'hina', text: '¡Qué estética tan bonita! ✨' },
+            { authorId: 'ayato', text: 'Buen encuadre. No te quedes hasta muy tarde afuera.' }
+          ]
+        };
+      }
+
+      const target = state.posts.find(p => p.id === post.id);
+      if (!target) return;
+      (data.likes || []).forEach(id => {
+        if (state.characters[id] && !target.likes.includes(id)) target.likes.push(id);
+      });
+      (data.comments || []).forEach((c, idx) => {
+        if (state.characters[c.authorId] && c.text) {
+          target.comments.push({ id: 'c-' + Date.now() + idx, authorId: c.authorId, text: c.text, timestamp: 'Ahora' });
+        }
+      });
+      saveState();
+      renderFeed();
+    }
+
+    // ==================== SIMULATE CAMPUS POST (WITH PROCEDURAL ART) & CAMPUS RUMORS ====================
+    async function simulateCampusPost() {
+      const btn = document.getElementById('btn-sim-campus');
+      btn.innerHTML = '<span>⏳</span><span>Generando...</span>';
+      const candidates = Object.values(state.characters).filter(c => c.id !== 'moka' && c.id !== 'campus');
+      const author = candidates[Math.floor(Math.random() * candidates.length)];
+
+      const sys = `Eres ${author.name} (${author.handle}). ${author.personality}
+Contexto actual: ${buildWorldContextSummary()}
+Publica un nuevo post en tu Instagram universitario. Responde en JSON: {"caption":"...","location":"...","theme":"cafe|lab|train|library|sweets"}`;
+
+      const raw = await callGemini(sys, 'Crea una publicación nueva con foto y texto breve acorde a tu vida diaria en Tokio.', null, true);
+      let data = null;
+      if (raw) { try { data = JSON.parse(raw); } catch (e) {} }
+      if (!data) {
+        data = author.id === 'ayato'
+          ? { caption: 'Notas de laboratorio antes de volver a casa.', location: 'Facultad de Ciencias', theme: 'lab' }
+          : { caption: 'Tarde perfecta para algo dulce después de clases 🍰✨', location: 'Shibuya, Tokio', theme: 'sweets' };
+      }
+
+      state.posts.unshift({
+        id: 'post-' + Date.now(),
+        authorId: author.id,
+        image: makeSceneArt(data.theme || 'cafe'),
+        aspect: '1:1',
+        filter: 'filter-rain',
+        caption: data.caption,
+        location: data.location || 'Tokio',
+        timestamp: 'Ahora mismo',
+        likes: [],
+        savedBy: [],
+        comments: []
+      });
+
+      saveState();
+      btn.innerHTML = '<span>✨</span><span>Simular campus</span>';
+      renderFeed();
+    }
+
+    async function generateCampusRumor() {
+      const btn = document.getElementById('btn-rumor-campus');
+      btn.innerHTML = '<span>⏳</span><span>Investigando...</span>';
+      const worldCtx = buildWorldContextSummary();
+
+      const sys = `Eres la cuenta anónima "Confesiones Campus Tokio" (@tokio_campus). Publicas rumores y avistamientos universitarios en formato "Confesión #..." inspirados sutilmente en lo que pasa en el campus, sin revelar nombres completos de forma invasiva (por ejemplo llamando a Ayato "el príncipe de hielo de Ciencias" y a Moka "la chica pálida de cabello largo de Humanidades").
+Responde en JSON: {"caption":"Confesión #...","hinaComment":"comentario curioso de Hina con emojis"}`;
+
+      const raw = await callGemini(sys, `Basándote en estos eventos recientes:\n${worldCtx}\nCrea un rumor/confesión universitaria entretenida.`, null, true);
+      let data = null;
+      if (raw) { try { data = JSON.parse(raw); } catch (e) {} }
+      if (!data) {
+        data = {
+          caption: 'Confesión #429: Dicen que vieron al «príncipe de hielo» de Ciencias cerca de la cafetería Komorebi mirando hacia la mesa de una chica de Humanidades de cabello larguísimo. ¿Desde cuándo él sale del laboratorio a mediodía?',
+          hinaComment: '¿Cómo que mi hermano salió del laboratorio a mediodía?! 👀✨'
+        };
+      }
+
+      state.posts.unshift({
+        id: 'post-' + Date.now(),
+        authorId: 'campus',
+        image: makeSceneArt('cafe'),
+        aspect: '1:1',
+        filter: 'filter-night',
+        caption: data.caption,
+        location: 'Campus Central Tokio',
+        timestamp: 'Ahora mismo',
+        likes: ['hina'],
+        savedBy: [],
+        comments: data.hinaComment ? [{ id: 'c-' + Date.now(), authorId: 'hina', text: data.hinaComment, timestamp: 'Ahora' }] : []
+      });
+
+      saveState();
+      btn.innerHTML = '<span>👁️</span><span>Rumor del campus</span>';
+      renderFeed();
+    }
+
+    // ==================== DIRECT MESSAGES & 24H NOTES ====================
+    function renderDMView() {
+      renderNotesTray();
+      const list = document.getElementById('dm-threads-list');
+      list.innerHTML = Object.values(state.characters).filter(c => c.id !== 'moka').map(char => {
+        const msgs = state.dms[char.id] || [];
+        const last = msgs[msgs.length - 1];
+        return `
+          <div onclick="openDMThread('${char.id}')" class="px-4 py-3 flex items-center gap-3 hover:bg-zinc-900/60 cursor-pointer transition">
+            <img src="${char.avatar}" class="w-12 h-12 rounded-full object-cover border border-zinc-800" />
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-white">${char.name}</span>
+                <span class="text-[10px] text-zinc-500">${last ? last.timestamp : ''}</span>
+              </div>
+              <p class="text-xs text-zinc-400 truncate mt-0.5">${last ? (last.image ? '📷 Foto' : last.text) : 'Envía un mensaje...'}</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderNotesTray() {
+      const tray = document.getElementById('dm-notes-tray');
+      const orderedIds = ['moka', ...Object.keys(state.characters).filter(id => id !== 'moka' && id !== 'campus')];
+
+      tray.innerHTML = orderedIds.map(id => {
+        const char = state.characters[id];
+        if (!char) return '';
+        const note = state.notes[id];
+        const isOwn = id === 'moka';
+        return `
+          <div onclick="${isOwn ? 'openNoteModal()' : `openDMThread('${id}')`}" class="relative flex flex-col items-center shrink-0 cursor-pointer group w-16">
+            <div class="mb-1 px-2 py-1 rounded-2xl bg-zinc-900 border border-zinc-800 text-[10px] text-zinc-200 max-w-[74px] truncate shadow-md group-hover:border-zinc-700">
+              ${note?.text || (isOwn ? 'Nota...' : '...')}
+            </div>
+            <img src="${char.avatar}" class="w-12 h-12 rounded-full object-cover border border-zinc-700" />
+            <span class="text-[10px] text-zinc-400 mt-1 truncate w-full text-center">${isOwn ? 'Tu nota' : char.name.split(' ')[0]}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openNoteModal() {
+      document.getElementById('note-modal-avatar').src = state.characters.moka.avatar;
+      document.getElementById('note-text-input').value = state.notes.moka?.text || '';
+      document.getElementById('note-music-input').value = state.notes.moka?.music || '';
+      openModal('modal-note');
+    }
+
+    function clearOwnNote() {
+      state.notes.moka = { text: '', music: '' };
+      saveState();
+      closeModal('modal-note');
+      renderNotesTray();
+    }
+
+    async function saveOwnNote() {
+      const text = document.getElementById('note-text-input').value.trim();
+      const music = document.getElementById('note-music-input').value.trim();
+      state.notes.moka = { text, music };
+      if (text) addSyncNoticeToWorld(`Moka dejó una nota en Instagram: «${text}»${music ? ` (${music})` : ''}.`);
+      saveState();
+      closeModal('modal-note');
+      renderNotesTray();
+
+      if (!text) return;
+      const ayato = state.characters.ayato;
+      const sys = `Eres Ayato Fushimi (${ayato.handle}). ${ayato.personality}
+Contexto actual: ${buildWorldContextSummary()}
+Moka acaba de poner una Nota de 24 horas en sus mensajes de Instagram. Responde con un mensaje directo breve, sobrio y atento.`;
+      const reply = await callGemini(sys, `Nota de Moka: "${text}"${music ? ` | Canción: "${music}"` : ''}. Escribe tu DM.`);
+      if (reply) {
+        pushDM('ayato', {
+          id: 'dm-' + Date.now(),
+          senderId: 'ayato',
+          text: reply,
+          timestamp: state.clock
+        });
+      }
+    }
+
+    function openDMThread(userId) {
+      activeDMUserId = userId;
+      switchPhoneTab('dm');
+      document.getElementById('dm-inbox-view').classList.add('hidden');
+      document.getElementById('dm-chat-view').classList.remove('hidden');
+      document.getElementById('dm-unread-badge').classList.add('hidden');
+
+      const char = state.characters[userId];
+      document.getElementById('dm-active-avatar').src = char.avatar;
+      document.getElementById('dm-active-name').textContent = char.name;
+      renderDMMessages();
+    }
+
+    function closeDMThread() {
+      activeDMUserId = null;
+      document.getElementById('dm-chat-view').classList.add('hidden');
+      document.getElementById('dm-inbox-view').classList.remove('hidden');
+      renderDMView();
+    }
+
+    function openActiveOCFromDM() {
+      if (activeDMUserId) openOCModal(activeDMUserId);
+    }
+
+    function pushDM(threadId, msgObj) {
+      if (!state.dms[threadId]) state.dms[threadId] = [];
+      state.dms[threadId].push(msgObj);
+      saveState();
+
+      if (activeDMUserId === threadId && !document.getElementById('tab-dm').classList.contains('hidden')) {
+        renderDMMessages();
+      } else {
+        document.getElementById('dm-unread-badge').classList.remove('hidden');
+        const sender = state.characters[msgObj.senderId];
+        if (sender) {
+          showToast(sender.avatar, sender.name, msgObj.text, () => {
+            if (state.viewMode === 'world') setViewMode('phone');
+            openDMThread(threadId);
+          });
+        }
+      }
+    }
+
+    function renderDMMessages() {
+      const box = document.getElementById('dm-messages-box');
+      const msgs = state.dms[activeDMUserId] || [];
+      const lastAIIndex = msgs.map(m => m.senderId !== 'moka').lastIndexOf(true);
+
+      box.innerHTML = msgs.map((m, idx) => {
+        const isMe = m.senderId === 'moka';
+        const isLastAI = !isMe && idx === lastAIIndex;
+        return `
+          <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} space-y-1">
+            ${m.storyThumb ? `<img src="${m.storyThumb}" class="w-24 h-32 rounded-xl object-cover border border-zinc-800 opacity-80" />` : ''}
+            ${m.image ? `<img src="${m.image}" class="max-w-[200px] rounded-2xl object-cover border border-zinc-800" />` : ''}
+            ${m.text ? `
+              <div class="max-w-[80%] px-3.5 py-2 rounded-2xl text-xs leading-relaxed ${isMe ? 'bg-indigo-600 text-white rounded-br-sm' : 'bg-zinc-900 border border-zinc-800 text-zinc-100 rounded-bl-sm'}">
+                ${m.text}
+              </div>
+            ` : ''}
+            <div class="flex items-center gap-2 text-[10px] text-zinc-500 px-1">
+              <span>${m.timestamp || ''}</span>
+              ${isLastAI ? `
+                <button onclick="editLastDM()" class="hover:text-zinc-300" title="Editar respuesta">✏️</button>
+                <button onclick="regenerateLastDM()" class="hover:text-indigo-400" title="Regenerar respuesta">🔄</button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+      box.scrollTop = box.scrollHeight;
+    }
+
+    async function handleDMImageSelect(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      dmDraftImage = await compressImageFile(file, 800, 0.82);
+      document.getElementById('dm-img-preview').src = dmDraftImage;
+      document.getElementById('dm-img-preview-bar').classList.remove('hidden');
+    }
+
+    function clearDMImage() {
+      dmDraftImage = '';
+      document.getElementById('dm-img-preview-bar').classList.add('hidden');
+    }
+
+    async function sendDMMessage(overrideText = null, overrideThumb = null) {
+      if (!activeDMUserId) return;
+      const input = document.getElementById('dm-input');
+      const text = overrideText !== null ? overrideText : input.value.trim();
+      const image = dmDraftImage;
+      if (!text && !image) return;
+
+      if (overrideText === null) input.value = '';
+      clearDMImage();
+
+      const targetId = activeDMUserId;
+      state.dms[targetId].push({
+        id: 'dm-' + Date.now(),
+        senderId: 'moka',
+        text,
+        image: image || '',
+        storyThumb: overrideThumb || '',
+        timestamp: state.clock
+      });
+      saveState();
+      renderDMMessages();
+
+      await generateDMReply(targetId, text, image || overrideThumb);
+    }
+
+    async function generateDMReply(targetId, userText, imgData) {
+      const char = state.characters[targetId];
+      const history = (state.dms[targetId] || []).slice(-8).map(m => `${m.senderId === 'moka' ? 'Moka' : char.name}: ${m.text || '[Foto]'}`).join('\n');
+      const sys = `Eres ${char.name} (${char.handle}). ${char.personality}
+Contexto actual de Tokio:
+${buildWorldContextSummary()}
+Historial reciente de este chat privado:
+${history}
+Responde como ${char.name} en un mensaje directo natural, coherente con tu personalidad y con lo que ocurre en Vida Exterior.`;
+
+      const reply = await callGemini(sys, userText || 'Moka te envió esta foto por mensaje directo.', imgData);
+      const fallback = targetId === 'ayato'
+        ? 'Entendido. Avísame si necesitas algo más antes de tu parcial.'
+        : '¡Ay, qué lindo! Cuéntame más ✨';
+
+      pushDM(targetId, {
+        id: 'dm-' + Date.now(),
+        senderId: targetId,
+        text: reply || fallback,
+        timestamp: state.clock
+      });
+    }
+
+    function editLastDM() {
+      if (!activeDMUserId) return;
+      const msgs = state.dms[activeDMUserId] || [];
+      for (let i = msgs.length - 1; i >= 0; i--) {
+        if (msgs[i].senderId !== 'moka') {
+          const edited = prompt('Editar mensaje:', msgs[i].text);
+          if (edited !== null && edited.trim()) {
+            msgs[i].text = edited.trim();
+            saveState();
+            renderDMMessages();
+          }
+          break;
+        }
+      }
+    }
+
+    async function regenerateLastDM() {
+      if (!activeDMUserId) return;
+      const msgs = state.dms[activeDMUserId] || [];
+      for (let i = msgs.length - 1; i >= 0; i--) {
+        if (msgs[i].senderId !== 'moka') {
+          msgs.splice(i, 1);
+          break;
+        }
+      }
+      saveState();
+      renderDMMessages();
+      const lastUser = [...msgs].reverse().find(m => m.senderId === 'moka');
+      await generateDMReply(activeDMUserId, lastUser?.text || '...', lastUser?.image || null);
+    }
+
+    function openSharePostModal(postId) {
+      const list = document.getElementById('share-targets-list');
+      list.innerHTML = Object.values(state.characters).filter(c => c.id !== 'moka').map(c => `
+        <button onclick="sharePostTo('${postId}', '${c.id}')" class="w-full p-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 flex items-center gap-2.5 text-left">
+          <img src="${c.avatar}" class="w-8 h-8 rounded-full object-cover" />
+          <div>
+            <div class="font-semibold text-white">${c.name}</div>
+            <div class="text-[10px] text-zinc-400">${c.handle}</div>
+          </div>
+        </button>
+      `).join('');
+      openModal('modal-share');
+    }
+
+    async function sharePostTo(postId, targetId) {
+      const post = state.posts.find(p => p.id === postId);
+      closeModal('modal-share');
+      if (!post) return;
+      openDMThread(targetId);
+      await sendDMMessage(`Compartió una publicación de ${state.characters[post.authorId]?.handle}: "${post.caption}"`, post.image);
+    }
+
+    // ==================== PROFILE & OC MANAGER (+ RANDOM OC GENERATOR) ====================
+    function renderProfileTab() {
+      const char = state.characters[state.activeProfileId] || state.characters.moka;
+      const userPosts = state.posts.filter(p => p.authorId === char.id);
+      const savedPosts = state.posts.filter(p => p.savedBy.includes(char.id));
+      const isOwn = char.id === 'moka';
+
+      document.getElementById('profile-header-box').innerHTML = `
+        <div class="flex items-center gap-4">
+          <div class="relative cursor-pointer" onclick="document.getElementById('quick-avatar-upload').click()" title="Cambiar foto de perfil">
+            <img src="${char.avatar}" class="w-16 h-16 rounded-full object-cover border border-zinc-700" />
+            <span class="absolute bottom-0 right-0 bg-indigo-600 text-white text-[10px] px-1.5 py-0.5 rounded-full">📷</span>
+            <input type="file" id="quick-avatar-upload" accept="image/*" class="hidden" onchange="quickUploadProfileAvatar(event, '${char.id}')" />
+          </div>
+          <div class="flex-1 flex justify-around text-center">
+            <div><div class="text-sm font-bold text-white">${userPosts.length}</div><div class="text-[11px] text-zinc-400">Posts</div></div>
+            <div><div class="text-sm font-bold text-white">${isOwn ? '312' : '1.4k'}</div><div class="text-[11px] text-zinc-400">Seguidores</div></div>
+            <div><div class="text-sm font-bold text-white">${Object.keys(state.characters).length - 1}</div><div class="text-[11px] text-zinc-400">Seguidos</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="text-xs font-semibold text-white">${char.name} <span class="text-zinc-500 font-normal">${char.handle}</span></div>
+          <div class="text-[11px] text-indigo-400">${char.role}</div>
+          <p class="text-xs text-zinc-300 whitespace-pre-line mt-1">${char.bio}</p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="openOCModal('${char.id}')" class="flex-1 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-medium text-white">Editar perfil / Ficha IA</button>
+          ${!isOwn ? `<button onclick="openDMThread('${char.id}')" class="flex-1 py-1.5 rounded-lg bg-indigo-600 text-xs font-medium text-white">Mensaje</button>` : ''}
+        </div>
+      `;
+
+      const items = state.profileGridTab === 'saved' && isOwn ? savedPosts : userPosts;
+      document.getElementById('profile-grid').innerHTML = items.length
+        ? items.map(p => `
+            <div onclick="switchPhoneTab('feed')" class="aspect-square bg-zinc-900 overflow-hidden cursor-pointer relative group">
+              <img src="${p.image}" class="w-full h-full object-cover ${p.filter || 'filter-none'}" />
+            </div>
+          `).join('')
+        : `<div class="col-span-3 py-10 text-center text-xs text-zinc-500">Sin publicaciones aquí todavía.</div>`;
+    }
+
+    function setProfileGridTab(tab) {
+      state.profileGridTab = tab;
+      document.getElementById('prof-tab-posts').className = tab === 'posts' ? 'py-2.5 border-b-2 border-white text-white' : 'py-2.5 border-b-2 border-transparent text-zinc-500';
+      document.getElementById('prof-tab-saved').className = tab === 'saved' ? 'py-2.5 border-b-2 border-white text-white' : 'py-2.5 border-b-2 border-transparent text-zinc-500';
+      renderProfileTab();
+    }
+
+    async function quickUploadProfileAvatar(e, charId) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const dataUrl = await compressImageFile(file, 360, 0.85);
+      state.characters[charId].avatar = dataUrl;
+      if (charId === 'moka') document.getElementById('nav-moka-avatar').src = dataUrl;
+      saveState();
+      renderProfileTab();
+      renderStoriesTray();
+    }
+
+    function renderOCList() {
+      const box = document.getElementById('oc-list');
+      box.innerHTML = Object.values(state.characters).map(c => `
+        <div class="p-3 rounded-2xl bg-zinc-950 border border-zinc-800/90 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3 min-w-0 cursor-pointer" onclick="openUserProfile('${c.id}')">
+            <img src="${c.avatar}" class="w-11 h-11 rounded-full object-cover border border-zinc-700 shrink-0" />
+            <div class="min-w-0">
+              <div class="text-xs font-semibold text-white truncate">${c.name} <span class="text-zinc-500 font-normal">${c.handle}</span></div>
+              <div class="text-[11px] text-indigo-400 truncate">${c.role}</div>
+              <p class="text-[11px] text-zinc-400 truncate mt-0.5">${c.bio}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-1.5 shrink-0">
+            ${c.id !== 'moka' ? `<button onclick="openDMThread('${c.id}')" class="px-2.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-[11px] text-zinc-200">DM</button>` : ''}
+            <button onclick="openOCModal('${c.id}')" class="px-2.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-[11px] text-indigo-300">Editar</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    const RANDOM_OC_POOL = [
+      { name: 'Ren Takahashi', handle: '@ren.takahashi', role: 'Arquitectura • 21 años', bio: 'Maquetas, café filtrado y fotografía analógica en Tokio.', personality: 'Ren Takahashi, 21 años, estudiante de Arquitectura en Tokio. Tranquilo, observador y amable, siempre lleva una cámara analógica y cuadernos de bocetos. Admira la estética silenciosa de Moka y respeta a Ayato.', colors: ['#0f172a', '#334155', '#38bdf8'] },
+      { name: 'Sora Kurosawa', handle: '@sora_kuro', role: 'Literatura Comparada • 20 años', bio: 'Libros viejos, lluvia y música clásica.', personality: 'Sora Kurosawa, 20 años, compañera de la Facultad de Humanidades. Intelectual, ligeramente tímida, apasionada por la literatura rusa y japonesa. Siente afinidad natural con Moka Momose.', colors: ['#1e1b4b', '#4c1d95', '#c084fc'] },
+      { name: 'Haruto Saeki', handle: '@haruto.bio', role: 'Posgrado Genética • 24 años', bio: 'Compañero de laboratorio de @ayato_f.', personality: 'Haruto Saeki, 24 años, compañero de laboratorio de Ayato Fushimi en Ciencias. Más conversador y bromista que Ayato, le encanta notar cuando el «príncipe de hielo» presta atención a alguien fuera del laboratorio.', colors: ['#064e3b', '#0f766e', '#5eead4'] },
+      { name: 'Mei Shirakawa', handle: '@mei.shirakawa', role: 'Bellas Artes • 19 años', bio: 'Óleo, museos de Ueno y tardes grises 🎨', personality: 'Mei Shirakawa, 19 años, estudiante de Bellas Artes. Sensible, creativa y dulce, siempre encuentra inspiración en la apariencia de porcelana y el estilo dark academia de Moka.', colors: ['#3f1d2e', '#701a75', '#f472b6'] }
+    ];
+
+    function buildRandomOCData() {
+      const base = RANDOM_OC_POOL[Math.floor(Math.random() * RANDOM_OC_POOL.length)];
+      const suffix = Math.floor(10 + Math.random() * 89);
+      const initials = base.name.split(' ').map(w => w[0]).join('');
+      return {
+        name: base.name,
+        handle: `${base.handle}_${suffix}`,
+        role: base.role,
+        bio: base.bio,
+        personality: base.personality,
+        avatar: makeProceduralAvatar(initials, base.colors[0], base.colors[1], base.colors[2])
+      };
+    }
+
+    function createRandomOC(autoSave = false) {
+      const rnd = buildRandomOCData();
+      if (autoSave) {
+        const id = 'oc-' + Date.now();
+        state.characters[id] = { id, isUser: false, ...rnd };
+        state.dms[id] = [];
+        saveState();
+        renderOCList();
+        showToast(rnd.avatar, 'Nuevo personaje creado', `${rnd.name} (${rnd.handle}) se unió al campus.`);
+      }
+    }
+
+    function fillRandomOCFields() {
+      const rnd = buildRandomOCData();
+      document.getElementById('oc-edit-name').value = rnd.name;
+      document.getElementById('oc-edit-handle').value = rnd.handle;
+      document.getElementById('oc-edit-role').value = rnd.role;
+      document.getElementById('oc-edit-bio').value = rnd.bio;
+      document.getElementById('oc-edit-personality').value = rnd.personality;
+      document.getElementById('oc-edit-avatar-preview').src = rnd.avatar;
+    }
+
+    function openOCModal(charId = null) {
+      const isNew = !charId;
+      document.getElementById('oc-modal-title').textContent = isNew ? 'Crear nuevo personaje IA' : 'Editar personaje';
+      document.getElementById('oc-edit-id').value = charId || '';
+      document.getElementById('btn-delete-oc').classList.toggle('hidden', isNew || ['moka', 'ayato', 'hina', 'campus'].includes(charId));
+
+      if (isNew) {
+        fillRandomOCFields();
+      } else {
+        const c = state.characters[charId];
+        document.getElementById('oc-edit-name').value = c.name;
+        document.getElementById('oc-edit-handle').value = c.handle;
+        document.getElementById('oc-edit-role').value = c.role;
+        document.getElementById('oc-edit-bio').value = c.bio;
+        document.getElementById('oc-edit-personality').value = c.personality;
+        document.getElementById('oc-edit-avatar-preview').src = c.avatar;
+      }
+      openModal('modal-oc');
+    }
+
+    async function handleOCAvatarSelect(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      document.getElementById('oc-edit-avatar-preview').src = await compressImageFile(file, 360, 0.85);
+    }
+
+    function saveOC() {
+      const existingId = document.getElementById('oc-edit-id').value;
+      const id = existingId || ('oc-' + Date.now());
+      const name = document.getElementById('oc-edit-name').value.trim() || 'Personaje Tokio';
+      let handle = document.getElementById('oc-edit-handle').value.trim() || '@tokio_oc';
+      if (!handle.startsWith('@')) handle = '@' + handle;
+
+      state.characters[id] = {
+        id,
+        isUser: id === 'moka',
+        name,
+        handle,
+        role: document.getElementById('oc-edit-role').value.trim(),
+        bio: document.getElementById('oc-edit-bio').value.trim(),
+        personality: document.getElementById('oc-edit-personality').value.trim(),
+        avatar: document.getElementById('oc-edit-avatar-preview').src
+      };
+      if (!state.dms[id]) state.dms[id] = [];
+      if (id === 'moka') document.getElementById('nav-moka-avatar').src = state.characters[id].avatar;
+
+      saveState();
+      closeModal('modal-oc');
+      renderOCList();
+      renderStoriesTray();
+      if (!document.getElementById('tab-profile').classList.contains('hidden')) renderProfileTab();
+    }
+
+    function deleteCurrentOC() {
+      const id = document.getElementById('oc-edit-id').value;
+      if (!id || ['moka', 'ayato', 'hina', 'campus'].includes(id)) return;
+      delete state.characters[id];
+      delete state.dms[id];
+      saveState();
+      closeModal('modal-oc');
+      renderOCList();
+    }
+
+    // ==================== VIDA EXTERIOR (SINGLE CONTINUOUS STORY + BAG + CLOCK + THOUGHTS) ====================
+    function renderWorldView() {
+      document.getElementById('current-scene-title').textContent = state.currentScene;
+      document.getElementById('world-clock-display').textContent = `${state.clock} hrs`;
+      document.getElementById('world-weather-display').textContent = state.weather;
+      document.getElementById('world-bg-layer').style.backgroundImage = state.worldBg ? `url('${state.worldBg}')` : '';
+
+      renderBagList();
+      const stream = document.getElementById('world-story-stream');
+      const lastNarratorIdx = state.storyMessages.map(m => m.type === 'narrator').lastIndexOf(true);
+
+      stream.innerHTML = state.storyMessages.map((m, idx) => {
+        if (m.type === 'scene_notice') {
+          return `
+            <div class="my-4 flex items-center gap-3">
+              <div class="h-px flex-1 bg-zinc-800"></div>
+              <div class="px-3 py-1 rounded-full bg-zinc-900/95 border border-zinc-700/80 text-[11px] text-indigo-300 font-medium shadow">
+                📍 Cambio de escenario: ${m.location} • ${m.clock} hrs • ${m.weather}
+              </div>
+              <div class="h-px flex-1 bg-zinc-800"></div>
+            </div>
+          `;
+        }
+        if (m.type === 'sync_notice') {
+          return `
+            <div class="mx-auto max-w-md px-3 py-1.5 rounded-xl bg-zinc-900/70 border border-zinc-800/80 text-[11px] text-zinc-400 text-center">
+              📱 ${m.text}
+            </div>
+          `;
+        }
+        if (m.type === 'user') {
+          if (m.isThought) {
+            return `
+              <div class="ml-auto max-w-xl thought-bubble rounded-2xl px-4 py-3 text-xs sm:text-sm leading-relaxed">
+                <div class="text-[10px] uppercase tracking-wider text-indigo-400 font-semibold mb-1">💭 Pensamiento interno de Moka (no audible)</div>
+                ${formatNarrativeText(m.text)}
+              </div>
+            `;
+          }
+          return `
+            <div class="ml-auto max-w-xl bg-zinc-900/90 border border-zinc-800 rounded-2xl px-4 py-3 text-xs sm:text-sm leading-relaxed text-zinc-100 shadow">
+              <div class="text-[10px] text-zinc-500 font-medium mb-1">Moka Momose</div>
+              ${formatNarrativeText(m.text)}
+            </div>
+          `;
+        }
+        const isLastAI = m.type === 'narrator' && idx === lastNarratorIdx;
+        return `
+          <div class="mr-auto max-w-2xl bg-black/65 border border-zinc-800/80 rounded-2xl px-4 py-3.5 text-xs sm:text-sm leading-relaxed space-y-2 shadow-lg">
+            <div>${formatNarrativeText(m.text)}</div>
+            ${isLastAI ? `
+              <div class="pt-1 flex justify-end gap-2 text-[11px] text-zinc-500">
+                <button onclick="editLastWorldMessage()" class="hover:text-zinc-200 transition">✏️ Editar</button>
+                <button onclick="regenerateLastWorldMessage()" class="hover:text-indigo-400 transition">🔄 Regenerar</button>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+
+      stream.scrollTop = stream.scrollHeight;
+    }
+
+    function formatNarrativeText(raw) {
+      return (raw || '')
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/\*(.*?)\*/g, '<span class="narration-action">*$1*</span>')
+        .replace(/(—[^\n<]+)/g, '<span class="narration-dialogue">$1</span>')
+        .replace(/\n/g, '<br>');
+    }
+
+    function addSyncNoticeToWorld(text) {
+      state.storyMessages.push({
+        id: 'sync-' + Date.now(),
+        type: 'sync_notice',
+        text
+      });
+      if (!document.getElementById('pane-world').classList.contains('hidden')) renderWorldView();
+    }
+
+    function changeSceneLocation(locationName) {
+      if (state.currentScene === locationName) return;
+      state.currentScene = locationName;
+      if (locationName.includes('Komorebi')) state.worldBg = makeSceneArt('cafe');
+      else if (locationName.includes('Biblioteca')) state.worldBg = makeSceneArt('library');
+      else if (locationName.includes('Ciencias')) state.worldBg = makeSceneArt('lab');
+      else if (locationName.includes('Tren')) state.worldBg = makeSceneArt('train');
+      else if (locationName.includes('Mansión')) state.worldBg = makeSceneArt('cat');
+
+      state.storyMessages.push({
+        id: 'sc-' + Date.now(),
+        type: 'scene_notice',
+        location: locationName,
+        clock: state.clock,
+        weather: state.weather
+      });
+      saveState();
+      renderWorldView();
+    }
+
+    function promptCustomLocation() {
+      const loc = prompt('¿A qué lugar de Tokio se traslada la escena?', 'Estación de tren bajo la lluvia');
+      if (loc && loc.trim()) changeSceneLocation(loc.trim());
+    }
+
+    async function handleWorldBgSelect(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      state.worldBg = await compressImageFile(file, 1200, 0.82);
+      saveState();
+      renderWorldView();
+    }
+
+    // Clock & Weather Controls
+    function toggleClockPopover() {
+      document.getElementById('clock-popover').classList.toggle('hidden');
+    }
+
+    function advanceClock(minutesToAdd) {
+      const [h, m] = state.clock.split(':').map(Number);
+      const total = (h * 60 + m + minutesToAdd) % (24 * 60);
+      const nh = String(Math.floor(total / 60)).padStart(2, '0');
+      const nm = String(total % 60).padStart(2, '0');
+      state.clock = `${nh}:${nm}`;
+      saveState();
+      renderWorldView();
+    }
+
+    function setExactClock(timeStr) {
+      state.clock = timeStr;
+      saveState();
+      renderWorldView();
+    }
+
+    function setWeather(w) {
+      state.weather = w;
+      saveState();
+      renderWorldView();
+    }
+
+    // Bag Inventory Controls
+    function toggleBagPopover() {
+      document.getElementById('bag-popover').classList.toggle('hidden');
+    }
+
+    function renderBagList() {
+      const box = document.getElementById('bag-items-list');
+      box.innerHTML = state.bagItems.map(item => `
+        <div class="p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 flex items-center justify-between gap-2">
+          <div onclick="useBagItem('${item.id}')" class="cursor-pointer flex-1 min-w-0">
+            <div class="text-zinc-200 font-medium truncate">${item.name}</div>
+            <div class="text-[10px] text-zinc-400 truncate">${item.note || ''}</div>
+          </div>
+          <button onclick="removeBagItem('${item.id}')" class="text-zinc-500 hover:text-rose-400 text-[11px] px-1">✕</button>
+        </div>
+      `).join('');
+    }
+
+    function useBagItem(itemId) {
+      const item = state.bagItems.find(b => b.id === itemId);
+      if (!item) return;
+      const input = document.getElementById('world-input');
+      if (item.name.includes('Paraguas')) {
+        input.value = '*Tomo con cuidado el paraguas negro perfectamente doblado de sobre la mesa y lo deslizo suavemente hacia él.* —Gracias por prestármelo anoche... aquí tienes.';
+      } else if (item.name.includes('Tablet')) {
+        input.value = '*Enciendo la pantalla de mi tablet para revisar los últimos párrafos del ensayo antes del parcial de las 16:00 hrs.*';
+      } else {
+        input.value = `*Saco ${item.name} de mi bolso oscuro con movimientos pausados.*`;
+      }
+      toggleBagPopover();
+      input.focus();
+    }
+
+    function addBagItem() {
+      const inp = document.getElementById('new-bag-item-input');
+      const name = inp.value.trim();
+      if (!name) return;
+      state.bagItems.push({ id: 'bag-' + Date.now(), name, note: 'Guardado en el bolso' });
+      inp.value = '';
+      saveState();
+      renderBagList();
+    }
+
+    function removeBagItem(itemId) {
+      state.bagItems = state.bagItems.filter(b => b.id !== itemId);
+      saveState();
+      renderBagList();
+    }
+
+    // Thought vs Action Mode
+    function setWorldInputMode(mode) {
+      worldInputMode = mode;
+      document.getElementById('btn-mode-action').className = mode === 'action'
+        ? 'px-2.5 py-1 rounded-full bg-zinc-800 text-white font-medium transition'
+        : 'px-2.5 py-1 rounded-full bg-zinc-900 text-zinc-400 hover:text-white transition';
+      document.getElementById('btn-mode-thought').className = mode === 'thought'
+        ? 'px-2.5 py-1 rounded-full bg-indigo-600 text-white font-medium transition'
+        : 'px-2.5 py-1 rounded-full bg-zinc-900 text-zinc-400 hover:text-indigo-300 transition';
+
+      const ta = document.getElementById('world-input');
+      ta.placeholder = mode === 'thought'
+        ? 'Escribe lo que Moka piensa en silencio (Ayato NO podrá escucharlo)...'
+        : '*Acomodo despacio la manga de mi chaqueta negra...* —¿Qué haces por aquí?';
+    }
+
+    async function sendWorldTurn() {
+      const input = document.getElementById('world-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      input.value = '';
+      const isThought = worldInputMode === 'thought';
+      state.storyMessages.push({
+        id: 'sm-' + Date.now(),
+        type: 'user',
+        isThought,
+        text
+      });
+      advanceClock(4);
+      saveState();
+      renderWorldView();
+
+      await generateWorldContinuation();
+    }
+
+    async function generateWorldContinuation() {
+      const btn = document.getElementById('btn-send-world');
+      btn.textContent = '⏳...';
+      btn.disabled = true;
+
+      const moka = state.characters.moka;
+      const ayato = state.characters.ayato;
+      const sys = `Eres el narrador literario de una historia slice-of-life universitaria ambientada en Tokio en noviembre.
+Personaje principal ({{user}}): ${moka.personality}
+Personaje co-protagonista: ${ayato.personality}
+
+REGLAS ESTRICTAS DE FORMATO Y NARRACIÓN:
+1. Escribe siempre en tercera persona con un ritmo pausado, elegante, sensorial y realista.
+2. Rodea TODAS las narraciones, acciones, gestos y descripciones ambientales con un asterisco simple (*acción*), y escribe todos los diálogos hablados comenzando con guion largo de diálogo (—diálogo), sin comillas ni emojis.
+3. Si el último turno de Moka está marcado como [Pensamiento privado de Moka - NO audible por otros], Ayato y los demás personajes NO pueden leer su mente; solo pueden notar su expresión serena, su postura o el silencio, pero continúa la escena con naturalidad.
+4. Ayato avanza lentamente, respeta los silencios y límites de Moka, y jamás describe acciones o diálogos por Moka.
+5. Ten en cuenta la hora actual en Tokio (${state.clock} hrs), el clima (${state.weather}), el escenario actual (${state.currentScene}) y lo que haya ocurrido recientemente en Instagram.`;
+
+      const prompt = `Historial y estado actual de la escena:\n${buildWorldContextSummary()}\n\nContinúa la narración ahora (2 a 3 párrafos envolventes).`;
+      const reply = await callGemini(sys, prompt);
+
+      const fallback = `*La campanilla de la puerta de ${state.currentScene} tintinea con suavidad mientras el aire frío de noviembre se cuela un instante desde la calle. Ayato Fushimi avanza con pasos tranquilos, sosteniendo su vaso de café negro sin azúcar, y detiene su mirada serena al reconocer la silueta etérea de Moka junto al ventanal y su paraguas negro doblado sobre la mesa.*\n\n—Buenas tardes —*saluda con esa voz grave, baja y pausada de siempre, manteniéndose a una distancia respetuosa para no invadir su espacio*—. No esperaba encontrarte por aquí. No hace falta que cargues con el paraguas todo el día; puedes quedártelo mientras siga lloviendo esta semana.`;
+
+      state.storyMessages.push({
+        id: 'sm-' + Date.now(),
+        type: 'narrator',
+        text: reply || fallback
+      });
+      saveState();
+      btn.textContent = 'Continuar';
+      btn.disabled = false;
+      renderWorldView();
+    }
+
+    function editLastWorldMessage() {
+      for (let i = state.storyMessages.length - 1; i >= 0; i--) {
+        if (state.storyMessages[i].type === 'narrator') {
+          const edited = prompt('Editar párrafo narrativo:', state.storyMessages[i].text);
+          if (edited !== null && edited.trim()) {
+            state.storyMessages[i].text = edited.trim();
+            saveState();
+            renderWorldView();
+          }
+          break;
+        }
+      }
+    }
+
+    async function regenerateLastWorldMessage() {
+      for (let i = state.storyMessages.length - 1; i >= 0; i--) {
+        if (state.storyMessages[i].type === 'narrator') {
+          state.storyMessages.splice(i, 1);
+          break;
+        }
+      }
+      saveState();
+      renderWorldView();
+      await generateWorldContinuation();
+    }
+
+    // ==================== NOVEL READER MODE ====================
+    function openNovelModal() {
+      const box = document.getElementById('novel-content-box');
+      let chapterNum = 1;
+      box.innerHTML = state.storyMessages.map(m => {
+        if (m.type === 'scene_notice') {
+          return `<div class="pt-6 pb-2 border-b border-zinc-800 text-indigo-300 font-sans text-xs uppercase tracking-widest">Capítulo ${chapterNum++} — ${m.location} (${m.clock} hrs)</div>`;
+        }
+        if (m.type === 'sync_notice') {
+          return `<p class="font-sans text-xs text-zinc-500 italic">[${m.text}]</p>`;
+        }
+        if (m.isThought) {
+          return `<p class="text-indigo-300/90 italic pl-4 border-l border-indigo-500/40">${formatNarrativeText(m.text)}</p>`;
+        }
+        return `<p>${formatNarrativeText(m.text)}</p>`;
+      }).join('');
+      openModal('modal-novel');
+    }
+
+    function downloadNovelTxt() {
+      const lines = state.storyMessages.map(m => {
+        if (m.type === 'scene_notice') return `\n=== ${m.location} (${m.clock} hrs • ${m.weather}) ===\n`;
+        if (m.type === 'sync_notice') return `[${m.text}]`;
+        if (m.isThought) return `(Pensamiento de Moka): ${m.text}`;
+        return m.text;
+      }).join('\n\n');
+
+      const blob = new Blob([`KIZUNA // CAMPUS TOKIO\n\n${lines}`], { type: 'text/plain;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'Kizuna_Campus_Tokio_Novela.txt';
+      a.click();
+    }
+
+    // ==================== API KEY, BACKUPS & MODALS ====================
+    function updateApiIndicator() {
+      const dot = document.getElementById('api-dot');
+      dot.className = state.apiKey ? 'w-2 h-2 rounded-full bg-emerald-400' : 'w-2 h-2 rounded-full bg-amber-500';
+      document.getElementById('api-key-input').value = state.apiKey || '';
+    }
+
+    function saveApiKey() {
+      state.apiKey = document.getElementById('api-key-input').value.trim();
+      saveState();
+      updateApiIndicator();
+      closeModal('modal-api');
+      showToast(state.characters.ayato.avatar, 'Clave API guardada', 'La IA multimodal está lista en tu navegador.');
+    }
+
+    async function testApiKey() {
+      const btn = document.getElementById('btn-test-api');
+      state.apiKey = document.getElementById('api-key-input').value.trim();
+      btn.textContent = 'Probando...';
+      const res = await callGemini('Responde únicamente: OK', 'Test');
+      btn.textContent = res ? '✅ Conectada' : '❌ Error de clave';
+      saveState();
+      updateApiIndicator();
+    }
+
+    function exportBackupJSON() {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `kizuna_respaldo_${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+    }
+
+    function importBackupJSON(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        try {
+          const parsed = JSON.parse(ev.target.result);
+          state = { ...buildDefaultState(), ...parsed };
+          saveState();
+          location.reload();
+        } catch (err) {
+          alert('El archivo JSON no es válido.');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function resetAllData() {
+      if (!confirm('¿Seguro que quieres reiniciar la historia, publicaciones y chats al estado inicial?')) return;
+      localStorage.removeItem(STORAGE_KEY);
+      location.reload();
+    }
+
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+    function showToast(avatar, title, body, onClick = null) {
+      const toast = document.getElementById('cross-toast');
+      document.getElementById('toast-avatar').src = avatar;
+      document.getElementById('toast-title').textContent = title;
+      document.getElementById('toast-body').textContent = body;
+      toastAction = onClick;
+      toast.classList.remove('hidden');
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => toast.classList.add('hidden'), 4800);
+    }
+
+    function handleToastClick() {
+      document.getElementById('cross-toast').classList.add('hidden');
+      if (typeof toastAction === 'function') toastAction();
+    }
+
+    // ==================== INITIALIZATION ====================
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('nav-moka-avatar').src = state.characters.moka.avatar;
+      updateApiIndicator();
+      setViewMode(window.innerWidth < 1024 && state.viewMode === 'split' ? 'phone' : state.viewMode);
+      renderFeed();
+      renderWorldView();
+    });
+  </script>
+</body>
+</html>
