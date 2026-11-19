@@ -137,20 +137,20 @@
 
       <button type="button" onclick="openModal('modal-api')" id="btn-api-status" class="px-2.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs flex items-center gap-1 text-zinc-300 transition">
         <span>🔑</span>
-        <span class="hidden sm:inline">API</span>
+        <span class="hidden sm:inline">Groq API</span>
         <span id="api-dot" class="w-2 h-2 rounded-full bg-amber-500"></span>
       </button>
     </div>
   </header>
 
-  <!-- INLINE API KEY QUICK BANNER -->
-  <div id="api-missing-banner" class="bg-amber-950/85 border-b border-amber-700/60 px-3 py-2 flex flex-wrap items-center justify-between gap-2 text-xs z-40">
-    <div class="flex items-center gap-2 text-amber-200">
-      <span>🔑</span>
-      <span>Pega tu clave API (empieza por <strong>AQ.</strong> o <strong>AIzaSy</strong>) para conectar los personajes:</span>
+  <!-- INLINE GROQ API KEY QUICK BANNER -->
+  <div id="api-missing-banner" class="bg-indigo-950/90 border-b border-indigo-700/60 px-3 py-2 flex flex-wrap items-center justify-between gap-2 text-xs z-40">
+    <div class="flex items-center gap-2 text-indigo-100">
+      <span>⚡</span>
+      <span>Obtén tu clave gratis (sin tarjeta) en <a href="https://console.groq.com/keys" target="_blank" class="underline font-semibold text-white">console.groq.com/keys</a> y pégala aquí:</span>
     </div>
     <div class="flex items-center gap-1.5 flex-1 sm:flex-initial max-w-md">
-      <input type="password" id="quick-api-input" placeholder="AQ.... o AIzaSy..." class="flex-1 sm:w-56 bg-black/70 border border-amber-700/70 rounded-lg px-2.5 py-1 text-xs text-white outline-none focus:border-indigo-400" />
+      <input type="password" id="quick-api-input" placeholder="gsk_..." class="flex-1 sm:w-56 bg-black/70 border border-indigo-600/70 rounded-lg px-2.5 py-1 text-xs text-white outline-none focus:border-indigo-400" />
       <button type="button" onclick="saveQuickApiKey()" class="px-3 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shrink-0">Activar IA</button>
     </div>
   </div>
@@ -240,7 +240,7 @@
           <div id="post-preview-empty" class="py-6 space-y-2">
             <div class="text-2xl">📸</div>
             <p class="text-xs font-medium text-zinc-200">Sube una foto real, arrástrala o pégala (Ctrl+V)</p>
-            <p class="text-[11px] text-zinc-500">Gemini analizará lo que aparece en tu imagen</p>
+            <p class="text-[11px] text-zinc-500">La IA comentará tu publicación y lo que ocurre en escena</p>
           </div>
           <div id="post-preview-wrap" class="hidden relative mx-auto overflow-hidden rounded-xl bg-zinc-900">
             <img id="post-preview-img" src="" class="w-full h-full object-cover transition-all duration-300" />
@@ -693,18 +693,18 @@
     </div>
   </div>
 
-  <!-- 6. API & BACKUP MODAL -->
+  <!-- 6. GROQ API & BACKUP MODAL -->
   <div id="modal-api" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
     <div class="w-full max-w-md bg-zinc-950 border border-zinc-800 rounded-3xl p-5 space-y-4 text-xs">
       <div class="flex items-center justify-between">
-        <h3 class="text-sm font-semibold text-white">🔑 Configuración IA & Respaldos</h3>
+        <h3 class="text-sm font-semibold text-white">⚡ Configuración Groq IA & Respaldos</h3>
         <button type="button" onclick="closeModal('modal-api')" class="text-zinc-400 hover:text-white">✕</button>
       </div>
 
       <div class="space-y-2">
-        <label class="text-zinc-300 font-medium block">Clave API (compatible con <strong>AQ....</strong> y <strong>AIzaSy...</strong>)</label>
-        <input type="password" id="api-key-input" placeholder="AQ.... o AIzaSy..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-white outline-none focus:border-indigo-500" />
-        <p class="text-[11px] text-zinc-400">Acepta tanto claves Vertex Express (<code>AQ.</code>) como claves Gemini Developer (<code>AIzaSy</code>). Se guarda solo en tu navegador.</p>
+        <label class="text-zinc-300 font-medium block">Clave API gratuita de Groq (<code>gsk_...</code>)</label>
+        <input type="password" id="api-key-input" placeholder="gsk_..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-white outline-none focus:border-indigo-500" />
+        <p class="text-[11px] text-zinc-400">Créala gratis en 10 segundos en <a href="https://console.groq.com/keys" target="_blank" class="text-indigo-400 underline font-medium">console.groq.com/keys</a> → <strong>Create API Key</strong>. No pide tarjeta.</p>
         <p id="api-test-msg" class="text-[11px] text-zinc-400"></p>
       </div>
 
@@ -824,7 +824,7 @@
     }
 
     // ==================== STATE ====================
-    const STORAGE_KEY = 'kizuna_tokio_v8';
+    const STORAGE_KEY = 'kizuna_tokio_groq_v1';
 
     function buildDefaultState() {
       const mokaAv = makeProceduralAvatar('MM', '#18181b', '#312e81', '#e2e8f0');
@@ -1002,14 +1002,15 @@
       const def = buildDefaultState();
       try {
         const raw = localStorage.getItem(STORAGE_KEY)
-          || localStorage.getItem('kizuna_tokio_v7')
-          || localStorage.getItem('kizuna_tokio_v6')
-          || localStorage.getItem('kizuna_tokio_v5');
+          || localStorage.getItem('kizuna_tokio_v8')
+          || localStorage.getItem('kizuna_tokio_v7');
         if (raw) {
           const parsed = JSON.parse(raw);
+          const validGroqKey = (parsed.apiKey || '').startsWith('gsk_') ? parsed.apiKey : '';
           return {
             ...def,
             ...parsed,
+            apiKey: validGroqKey,
             characters: { ...def.characters, ...(parsed.characters || {}) },
             notes: { ...def.notes, ...(parsed.notes || {}) },
             dms: { ...def.dms, ...(parsed.dms || {}) }
@@ -1023,7 +1024,7 @@
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       } catch (e) {
-        showToast(state.characters.moka.avatar, 'Memoria llena', 'Exporta un respaldo JSON en 🔑 API o borra algún post antiguo.');
+        showToast(state.characters.moka.avatar, 'Memoria llena', 'Exporta un respaldo JSON en 🔑 Groq API o borra algún post antiguo.');
       }
     }
 
@@ -1176,56 +1177,66 @@
       }
     });
 
-    // ==================== DUAL-ENDPOINT GEMINI CALLER (AQ. VERTEX EXPRESS + AIzaSy) ====================
-    async function callGemini(systemInstruction, userPrompt, imageDataUrl = null, expectJson = false) {
+    // ==================== GROQ API CALLER (TEXT + MULTIMODAL VISION) ====================
+    async function callGroq(systemInstruction, userPrompt, imageDataUrl = null, expectJson = false) {
       const key = (state.apiKey || '').trim();
       if (!key) {
-        return { ok: false, error: 'Falta tu clave API. Pégala arriba en la barra amarilla o en 🔑 API.' };
+        return { ok: false, error: 'Falta tu clave gratuita de Groq (gsk_...). Créala en console.groq.com/keys y pégala arriba.' };
       }
 
-      const isVertexExpress = key.startsWith('AQ.');
-      const models = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash'];
-      const parts = [{ text: userPrompt }];
+      const hasRealUploadedPhoto = Boolean(imageDataUrl && imageDataUrl.startsWith('data:image/'));
+      const attempts = hasRealUploadedPhoto
+        ? [
+            { model: 'meta-llama/llama-4-scout-17b-16e-instruct', useImage: true },
+            { model: 'llama-3.3-70b-versatile', useImage: false }
+          ]
+        : [
+            { model: 'llama-3.3-70b-versatile', useImage: false },
+            { model: 'llama-3.1-8b-instant', useImage: false }
+          ];
 
-      if (imageDataUrl && imageDataUrl.startsWith('data:image/')) {
-        const [meta, b64] = imageDataUrl.split(',');
-        const mimeType = meta.match(/data:(.*?);/)[1] || 'image/jpeg';
-        parts.push({ inlineData: { mimeType: mimeType, data: b64 } });
-      }
+      let lastError = 'No se pudo conectar con Groq.';
 
-      const body = {
-        systemInstruction: { parts: [{ text: systemInstruction }] },
-        contents: [{ role: 'user', parts }],
-        generationConfig: {
-          temperature: 0.9,
-          maxOutputTokens: 1100,
-          ...(expectJson ? { responseMimeType: 'application/json' } : {})
-        }
-      };
+      for (const attempt of attempts) {
+        const userContent = attempt.useImage
+          ? [
+              { type: 'text', text: userPrompt },
+              { type: 'image_url', image_url: { url: imageDataUrl } }
+            ]
+          : userPrompt;
 
-      let lastError = 'No se pudo conectar con la API de Gemini.';
-      for (const model of models) {
-        const url = isVertexExpress
-          ? `https://aiplatform.googleapis.com/v1/publishers/google/models/${model}:generateContent?key=${encodeURIComponent(key)}`
-          : `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`;
+        const body = {
+          model: attempt.model,
+          messages: [
+            { role: 'system', content: systemInstruction },
+            { role: 'user', content: userContent }
+          ],
+          temperature: 0.88,
+          max_tokens: 1100,
+          ...(expectJson ? { response_format: { type: 'json_object' } } : {})
+        };
 
         try {
-          const res = await fetch(url, {
+          const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${key}`
+            },
             body: JSON.stringify(body)
           });
           const data = await res.json();
           if (!res.ok) {
-            lastError = data?.error?.message || `Error HTTP ${res.status} en ${model}`;
+            lastError = data?.error?.message || `Error HTTP ${res.status} en Groq`;
             continue;
           }
-          const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+          const text = data?.choices?.[0]?.message?.content;
           if (text) return { ok: true, text: text.trim() };
         } catch (err) {
-          lastError = err.message || 'Error de red al contactar Gemini.';
+          lastError = err.message || 'Error de red al contactar Groq.';
         }
       }
+
       return { ok: false, error: lastError };
     }
 
@@ -1488,10 +1499,10 @@ ${ayato.personality}
 ${hina.personality}
 Contexto actual:
 ${buildWorldContextSummary()}
-Responde SIEMPRE en JSON válido: {"ayatoLikes": true, "hinaLikes": true, "responderId": "ayato" o "hina", "dmReply": "mensaje corto acorde a su personalidad"}`;
+Responde SIEMPRE en JSON válido con esta estructura exacta: {"ayatoLikes": true, "hinaLikes": true, "responderId": "ayato", "dmReply": "mensaje corto acorde a su personalidad"}`;
 
       const prompt = `Moka Momose subió una historia${story.closeFriends ? ' (Mejores Amigos)' : ''}. Texto: "${story.text || '(sin texto)'}". Ubicación: "${story.location || 'no indicada'}". Música: "${story.musicTitle || 'ninguna'}".`;
-      const res = await callGemini(sys, prompt, story.image, true);
+      const res = await callGroq(sys, prompt, story.image, true);
       if (!res.ok) return;
 
       let data = null;
@@ -1666,12 +1677,12 @@ Responde SIEMPRE en JSON válido: {"ayatoLikes": true, "hinaLikes": true, "respo
 
       const sys = `Eres ${chosen.name} (${chosen.handle}). ${chosen.personality}
 Contexto actual: ${buildWorldContextSummary()}
-Genera una historia corta de Instagram (máximo 90 caracteres) y opcionalmente una canción. Responde en JSON: {"text":"...", "location":"...", "musicTitle":"...", "musicArtist":"..."}`;
+Genera una historia corta de Instagram (máximo 90 caracteres) y opcionalmente una canción. Responde en JSON válido: {"text":"...", "location":"...", "musicTitle":"...", "musicArtist":"..."}`;
 
-      const res = await callGemini(sys, 'Crea una historia nueva para tu perfil ahora mismo.', null, true);
+      const res = await callGroq(sys, 'Crea una historia nueva para tu perfil ahora mismo en JSON.', null, true);
       btn.textContent = '✨ Historia IA';
       if (!res.ok) {
-        showToast(chosen.avatar, 'Error de IA', res.error);
+        showToast(chosen.avatar, 'Error de Groq', res.error);
         return;
       }
 
@@ -1854,7 +1865,7 @@ Genera una historia corta de Instagram (máximo 90 caracteres) y opcionalmente u
         const sys = `Eres ${responder.name} (${responder.handle}). ${responder.personality}
 Contexto actual: ${buildWorldContextSummary()}
 Responde con un comentario breve (1 oración) al comentario de Moka Momose en esta publicación de Instagram.`;
-        const res = await callGemini(sys, `Publicación: "${post.caption}". Moka comentó: "${txt}".`);
+        const res = await callGroq(sys, `Publicación: "${post.caption}". Moka comentó: "${txt}".`);
         if (res.ok) {
           post.comments.push({ id: 'c-' + (Date.now() + 1), authorId: responder.id, text: res.text.replace(/^["']|["']$/g, ''), timestamp: 'Ahora' });
           saveState();
@@ -1926,6 +1937,7 @@ Responde con un comentario breve (1 oración) al comentario de Moka Momose en es
       const authorId = document.getElementById('post-author-select').value || 'moka';
       const caption = document.getElementById('post-caption-input').value.trim();
       const location = document.getElementById('post-location-input').value.trim();
+      const hadRealImage = Boolean(postDraft.image);
       const image = postDraft.image || makeSceneArt('cafe');
 
       const newPost = {
@@ -1953,17 +1965,17 @@ Responde con un comentario breve (1 oración) al comentario de Moka Momose en es
       document.getElementById('post-location-input').value = '';
       renderPostDraftPreview();
       switchPhoneTab('feed');
-      generatePostReactions(newPost);
+      generatePostReactions(newPost, hadRealImage);
     }
 
-    async function generatePostReactions(post) {
+    async function generatePostReactions(post, useVision = false) {
       const mentioned = Object.values(state.characters).filter(c => c.id !== post.authorId && post.caption.toLowerCase().includes(c.handle.toLowerCase()));
       const responders = mentioned.length ? mentioned : [state.characters.hina, state.characters.ayato].filter(c => c && c.id !== post.authorId);
 
       const profilesDesc = responders.map(r => `- ${r.id} (${r.name}, ${r.handle}): ${r.personality}`).join('\n');
-      const sys = `Eres el motor de comentarios de Instagram en Tokio. Analiza la foto y el pie de foto, y genera reacciones realistas de:\n${profilesDesc}\nContexto: ${buildWorldContextSummary()}\nResponde SIEMPRE en JSON válido: {"likes":["ayato","hina"], "comments":[{"authorId":"hina","text":"..."}]}`;
+      const sys = `Eres el motor de comentarios de Instagram en Tokio. Genera reacciones realistas de:\n${profilesDesc}\nContexto: ${buildWorldContextSummary()}\nResponde SIEMPRE en JSON válido: {"likes":["ayato","hina"], "comments":[{"authorId":"hina","text":"..."}]}`;
 
-      const res = await callGemini(sys, `Autor: ${state.characters[post.authorId]?.name}. Pie de foto: "${post.caption}".`, post.image, true);
+      const res = await callGroq(sys, `Autor: ${state.characters[post.authorId]?.name}. Pie de foto: "${post.caption}". Ubicación: "${post.location}". Genera likes y comentarios en JSON.`, useVision ? post.image : null, true);
       if (!res.ok) return;
 
       let data = null;
@@ -1992,12 +2004,12 @@ Responde con un comentario breve (1 oración) al comentario de Moka Momose en es
 
       const sys = `Eres ${author.name} (${author.handle}). ${author.personality}
 Contexto: ${buildWorldContextSummary()}
-Publica un nuevo post en Instagram. Responde en JSON: {"caption":"...","location":"...","theme":"cafe|lab|train|library|sweets"}`;
+Publica un nuevo post en Instagram. Responde en JSON válido: {"caption":"...","location":"...","theme":"cafe|lab|train|library|sweets"}`;
 
-      const res = await callGemini(sys, 'Crea una publicación nueva con foto y texto breve.', null, true);
+      const res = await callGroq(sys, 'Crea una publicación nueva con foto y texto breve en JSON.', null, true);
       btn.innerHTML = '<span>✨</span><span>Simular campus</span>';
       if (!res.ok) {
-        showToast(author.avatar, 'Error de IA', res.error);
+        showToast(author.avatar, 'Error de Groq', res.error);
         return;
       }
 
@@ -2025,12 +2037,12 @@ Publica un nuevo post en Instagram. Responde en JSON: {"caption":"...","location
     async function generateCampusRumor() {
       const btn = document.getElementById('btn-rumor-campus');
       btn.innerHTML = '<span>⏳</span><span>Investigando...</span>';
-      const sys = `Eres la cuenta anónima "Confesiones Campus Tokio" (@tokio_campus). Publicas rumores en formato "Confesión #..." inspirados en el campus (llamando a Ayato "el príncipe de hielo de Ciencias" y a Moka "la chica pálida de cabello largo de Humanidades"). Responde en JSON: {"caption":"Confesión #...","hinaComment":"comentario curioso de Hina con emojis"}`;
+      const sys = `Eres la cuenta anónima "Confesiones Campus Tokio" (@tokio_campus). Publicas rumores en formato "Confesión #..." inspirados en el campus (llamando a Ayato "el príncipe de hielo de Ciencias" y a Moka "la chica pálida de cabello largo de Humanidades"). Responde en JSON válido: {"caption":"Confesión #...","hinaComment":"comentario curioso de Hina con emojis"}`;
 
-      const res = await callGemini(sys, `Eventos recientes:\n${buildWorldContextSummary()}\nCrea un rumor universitario.`, null, true);
+      const res = await callGroq(sys, `Eventos recientes:\n${buildWorldContextSummary()}\nCrea un rumor universitario en JSON.`, null, true);
       btn.innerHTML = '<span>👁️</span><span>Rumor del campus</span>';
       if (!res.ok) {
-        showToast(state.characters.campus.avatar, 'Error de IA', res.error);
+        showToast(state.characters.campus.avatar, 'Error de Groq', res.error);
         return;
       }
 
@@ -2125,7 +2137,7 @@ Publica un nuevo post en Instagram. Responde en JSON: {"caption":"...","location
       const sys = `Eres Ayato Fushimi (${ayato.handle}). ${ayato.personality}
 Contexto: ${buildWorldContextSummary()}
 Moka puso una Nota de 24 horas en Instagram. Responde con un DM breve y sobrio.`;
-      const res = await callGemini(sys, `Nota de Moka: "${text}"${music ? ` | Canción: "${music}"` : ''}.`);
+      const res = await callGroq(sys, `Nota de Moka: "${text}"${music ? ` | Canción: "${music}"` : ''}.`);
       if (res.ok) {
         pushDM('ayato', { id: 'dm-' + Date.now(), senderId: 'ayato', text: res.text, timestamp: state.clock });
       }
@@ -2251,9 +2263,9 @@ Historial reciente de este chat:
 ${history}
 Responde como ${char.name} en un DM natural.`;
 
-      const res = await callGemini(sys, userText || 'Moka te envió esta foto.', imgData);
+      const res = await callGroq(sys, userText || 'Moka te envió esta foto.', imgData);
       if (!res.ok) {
-        showToast(char.avatar, 'Error de IA en DM', res.error, () => openModal('modal-api'));
+        showToast(char.avatar, 'Error de Groq en DM', res.error, () => openModal('modal-api'));
         return;
       }
 
@@ -2532,7 +2544,7 @@ Responde como ${char.name} en un DM natural.`;
           return `
             <div class="mx-auto max-w-xl px-3.5 py-2.5 rounded-xl bg-rose-950/75 border border-rose-700/70 text-xs text-rose-200 flex items-center justify-between gap-2">
               <span>⚠️ ${m.text}</span>
-              <button type="button" onclick="openModal('modal-api')" class="px-2.5 py-1 rounded-lg bg-rose-700 hover:bg-rose-600 text-white text-[11px] font-semibold shrink-0">Revisar API</button>
+              <button type="button" onclick="openModal('modal-api')" class="px-2.5 py-1 rounded-lg bg-rose-700 hover:bg-rose-600 text-white text-[11px] font-semibold shrink-0">Revisar Groq</button>
             </div>
           `;
         }
@@ -2720,7 +2732,7 @@ Responde como ${char.name} en un DM natural.`;
         .map(c => `- ${c.name} (${c.handle}): ${c.personality}`)
         .join('\n');
 
-      const sys = `Eres el narrador literario de una historia slice-of-life universitaria ambientada en Tokio en noviembre.
+      const sys = `Eres el narrador literario de una historia slice-of-life universitaria ambientada en Tokio en noviembre. Escribe SIEMPRE en español natural, elegante y literario.
 Personaje principal ({{user}}): ${moka.personality}
 Personaje co-protagonista: ${ayato.personality}
 Otros personajes del campus disponibles si la escena los involucra:
@@ -2733,7 +2745,7 @@ REGLAS ESTRICTAS DE NARRACIÓN Y PENSAMIENTO:
 4. Ayato avanza lentamente, respeta los silencios y límites de Moka, y jamás describe acciones o diálogos por Moka.
 5. Hora actual: ${state.clock} hrs | Clima: ${state.weather} | Lugar actual: ${state.currentScene}.`;
 
-      const res = await callGemini(sys, `Historial y estado actual de la escena:\n${buildWorldContextSummary()}\n\nContinúa la narración desarrollando lo que acaba de hacer, decir o pensar Moka (2 a 3 párrafos envolventes y nunca repetitivos).`);
+      const res = await callGroq(sys, `Historial y estado actual de la escena:\n${buildWorldContextSummary()}\n\nContinúa la narración desarrollando lo que acaba de hacer, decir o pensar Moka (2 a 3 párrafos envolventes y nunca repetitivos).`);
 
       btn.textContent = 'Continuar';
       btn.disabled = false;
@@ -2830,10 +2842,10 @@ REGLAS ESTRICTAS DE NARRACIÓN Y PENSAMIENTO:
       state.apiKey = val;
       saveState();
       updateApiIndicator();
-      showToast(state.characters.ayato.avatar, 'Clave API guardada', 'Probando conexión con Gemini...');
-      const res = await callGemini('Responde únicamente: OK', 'Test');
+      showToast(state.characters.ayato.avatar, 'Clave Groq guardada', 'Probando conexión rápida...');
+      const res = await callGroq('Responde únicamente: OK', 'Test');
       if (res.ok) {
-        showToast(state.characters.ayato.avatar, 'IA conectada', 'Ya puedes continuar la historia y chatear.');
+        showToast(state.characters.ayato.avatar, 'Groq conectado ⚡', 'Ya puedes continuar la historia y chatear.');
       } else {
         showToast(state.characters.ayato.avatar, 'Aviso de conexión', res.error, () => openModal('modal-api'));
       }
@@ -2844,7 +2856,7 @@ REGLAS ESTRICTAS DE NARRACIÓN Y PENSAMIENTO:
       saveState();
       updateApiIndicator();
       closeModal('modal-api');
-      showToast(state.characters.ayato.avatar, 'Clave API guardada', 'La IA multimodal está lista en tu navegador.');
+      showToast(state.characters.ayato.avatar, 'Clave Groq guardada', 'La IA está lista en tu navegador.');
     }
 
     async function testApiKey() {
@@ -2853,10 +2865,10 @@ REGLAS ESTRICTAS DE NARRACIÓN Y PENSAMIENTO:
       state.apiKey = document.getElementById('api-key-input').value.trim();
       btn.textContent = 'Probando...';
       msg.textContent = '';
-      const res = await callGemini('Responde únicamente: OK', 'Test');
+      const res = await callGroq('Responde únicamente: OK', 'Test');
       if (res.ok) {
         btn.textContent = '✅ Conectada';
-        msg.textContent = 'Conexión exitosa con Gemini.';
+        msg.textContent = 'Conexión exitosa con Groq (Llama 3.3 70B).';
         msg.className = 'text-[11px] text-emerald-400';
       } else {
         btn.textContent = '❌ Error';
@@ -2894,7 +2906,7 @@ REGLAS ESTRICTAS DE NARRACIÓN Y PENSAMIENTO:
 
     function resetAllData() {
       if (!confirm('¿Seguro que quieres reiniciar la historia, publicaciones y chats al estado inicial?')) return;
-      [STORAGE_KEY, 'kizuna_tokio_v7', 'kizuna_tokio_v6', 'kizuna_tokio_v5', 'kizuna_tokio_v4', 'kizuna_tokio_v3'].forEach(k => localStorage.removeItem(k));
+      [STORAGE_KEY, 'kizuna_tokio_v8', 'kizuna_tokio_v7', 'kizuna_tokio_v6', 'kizuna_tokio_v5'].forEach(k => localStorage.removeItem(k));
       location.reload();
     }
 
