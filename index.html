@@ -17,8 +17,6 @@
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-    /* Native fallback so hidden modals/overlays can NEVER block clicks */
     .hidden { display: none !important; }
 
     body {
@@ -77,7 +75,7 @@
     .narration-action { color: #b8bcc8; font-style: italic; }
     .narration-dialogue { color: #f8fafc; font-weight: 400; }
     .thought-bubble {
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(168, 85, 247, 0.08));
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.14), rgba(168, 85, 247, 0.08));
       border-left: 2px solid #818cf8;
       color: #c7d2fe;
       font-style: italic;
@@ -144,6 +142,18 @@
       </button>
     </div>
   </header>
+
+  <!-- INLINE API KEY QUICK BANNER (Shown automatically until a valid API key is saved) -->
+  <div id="api-missing-banner" class="bg-amber-950/85 border-b border-amber-700/60 px-3 py-2 flex flex-wrap items-center justify-between gap-2 text-xs z-40">
+    <div class="flex items-center gap-2 text-amber-200">
+      <span>⚠️</span>
+      <span>Pega tu clave gratuita de <a href="https://aistudio.google.com/api-keys" target="_blank" class="underline font-semibold text-white">Google AI Studio</a> para que los personajes piensen y respondan de forma única:</span>
+    </div>
+    <div class="flex items-center gap-1.5 flex-1 sm:flex-initial max-w-md">
+      <input type="password" id="quick-api-input" placeholder="AIzaSy..." class="flex-1 sm:w-52 bg-black/70 border border-amber-700/70 rounded-lg px-2.5 py-1 text-xs text-white outline-none focus:border-indigo-400" />
+      <button type="button" onclick="saveQuickApiKey()" class="px-3 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shrink-0">Activar IA</button>
+    </div>
+  </div>
 
   <!-- CROSS-NOTIFICATION TOAST -->
   <div id="cross-toast" onclick="handleToastClick()" class="hidden fixed top-14 right-4 z-50 max-w-xs bg-zinc-900/95 backdrop-blur-md border border-zinc-700/80 rounded-2xl p-3 shadow-2xl cursor-pointer transition">
@@ -345,8 +355,8 @@
 
     <!-- ==================== VIDA EXTERIOR PANE ==================== -->
     <section id="pane-world" class="flex flex-1 flex-col h-[46vh] md:h-[calc(100vh-49px)] bg-zinc-950 relative overflow-hidden">
-      <div id="world-bg-layer" style="pointer-events:none;" class="absolute inset-0 bg-cover bg-center opacity-20 pointer-events-none transition-all duration-700"></div>
-      <div style="pointer-events:none;" class="absolute inset-0 bg-gradient-to-b from-black/80 via-zinc-950/85 to-black/95 pointer-events-none"></div>
+      <div id="world-bg-layer" style="pointer-events:none;" class="absolute inset-0 bg-cover bg-center opacity-20 transition-all duration-700"></div>
+      <div style="pointer-events:none;" class="absolute inset-0 bg-gradient-to-b from-black/80 via-zinc-950/85 to-black/95"></div>
 
       <!-- World Header -->
       <div class="relative z-30 px-4 py-2 border-b border-zinc-800/80 bg-black/80 backdrop-blur-md flex flex-wrap items-center justify-between gap-2">
@@ -695,6 +705,7 @@
         <label class="text-zinc-300 font-medium block">Clave API gratuita de Google AI Studio</label>
         <input type="password" id="api-key-input" placeholder="AIzaSy..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-white outline-none focus:border-indigo-500" />
         <p class="text-[11px] text-zinc-400">Genera tu clave gratis en <a href="https://aistudio.google.com/api-keys" target="_blank" class="text-indigo-400 underline">aistudio.google.com/api-keys</a> -> <strong>Create API key</strong>.</p>
+        <p id="api-test-msg" class="text-[11px] text-zinc-400"></p>
       </div>
 
       <div class="flex gap-2">
@@ -813,7 +824,7 @@
     }
 
     // ==================== STATE ====================
-    const STORAGE_KEY = 'kizuna_tokio_v6';
+    const STORAGE_KEY = 'kizuna_tokio_v7';
 
     function buildDefaultState() {
       const mokaAv = makeProceduralAvatar('MM', '#18181b', '#312e81', '#e2e8f0');
@@ -823,7 +834,6 @@
 
       return {
         apiKey: '',
-        model: 'gemini-2.5-flash',
         viewMode: 'split',
         clock: '13:15',
         weather: '🌧️ Lluvia 11°C',
@@ -992,9 +1002,9 @@
       const def = buildDefaultState();
       try {
         const raw = localStorage.getItem(STORAGE_KEY)
+          || localStorage.getItem('kizuna_tokio_v6')
           || localStorage.getItem('kizuna_tokio_v5')
-          || localStorage.getItem('kizuna_tokio_v4')
-          || localStorage.getItem('kizuna_tokio_v3');
+          || localStorage.getItem('kizuna_tokio_v4');
         if (raw) {
           const parsed = JSON.parse(raw);
           return {
@@ -1166,12 +1176,14 @@
       }
     });
 
-    // ==================== GEMINI API CALLER ====================
+    // ==================== GEMINI API CALLER WITH REAL DIAGNOSTICS ====================
     async function callGemini(systemInstruction, userPrompt, imageDataUrl = null, expectJson = false) {
       const key = (state.apiKey || '').trim();
-      if (!key) return null;
+      if (!key) {
+        return { ok: false, error: 'Falta tu clave API de Google AI Studio. Pégala arriba en la barra amarilla o en 🔑 API.' };
+      }
 
-      const models = [state.model || 'gemini-2.5-flash', 'gemini-2.0-flash'];
+      const models = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash'];
       const parts = [{ text: userPrompt }];
 
       if (imageDataUrl && imageDataUrl.startsWith('data:image/')) {
@@ -1184,12 +1196,13 @@
         system_instruction: { parts: [{ text: systemInstruction }] },
         contents: [{ role: 'user', parts }],
         generationConfig: {
-          temperature: 0.85,
-          maxOutputTokens: 900,
+          temperature: 0.9,
+          maxOutputTokens: 1100,
           ...(expectJson ? { responseMimeType: 'application/json' } : {})
         }
       };
 
+      let lastError = 'No se pudo conectar con Google AI Studio.';
       for (const model of models) {
         try {
           const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`, {
@@ -1197,24 +1210,28 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
           });
-          if (!res.ok) continue;
           const data = await res.json();
+          if (!res.ok) {
+            lastError = data?.error?.message || `Error HTTP ${res.status} en ${model}`;
+            continue;
+          }
           const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (text) return text.trim();
+          if (text) return { ok: true, text: text.trim() };
         } catch (err) {
-          console.warn('Gemini error on', model, err);
+          lastError = err.message || 'Error de red al contactar Gemini.';
         }
       }
-      return null;
+      return { ok: false, error: lastError };
     }
 
     function buildWorldContextSummary() {
-      const recentStory = state.storyMessages.slice(-6).map(m => {
+      const recentStory = state.storyMessages.slice(-8).map(m => {
         if (m.type === 'scene_notice') return `[Cambio de escenario a: ${m.location} (${m.clock}, ${m.weather})]`;
         if (m.type === 'sync_notice') return `[Actividad en red social: ${m.text}]`;
+        if (m.type === 'system_error') return '';
         if (m.isThought) return `[Pensamiento privado de Moka - NO audible por otros: ${m.text}]`;
         return `${m.type === 'user' ? 'Moka' : 'Narración'}: ${m.text}`;
-      }).join('\n');
+      }).filter(Boolean).join('\n');
 
       const bagSummary = state.bagItems.map(b => `${b.name} (${b.note})`).join(', ');
       return `Escenario actual: ${state.currentScene} | Hora en Tokio: ${state.clock} hrs | Clima: ${state.weather}.\nObjetos en el bolso/mesa de Moka: ${bagSummary}.\nÚltimos acontecimientos en Vida Exterior:\n${recentStory}`;
@@ -1469,17 +1486,11 @@ ${buildWorldContextSummary()}
 Responde SIEMPRE en JSON válido: {"ayatoLikes": true, "hinaLikes": true, "responderId": "ayato" o "hina", "dmReply": "mensaje corto acorde a su personalidad"}`;
 
       const prompt = `Moka Momose subió una historia${story.closeFriends ? ' (Mejores Amigos)' : ''}. Texto: "${story.text || '(sin texto)'}". Ubicación: "${story.location || 'no indicada'}". Música: "${story.musicTitle || 'ninguna'}".`;
-      const raw = await callGemini(sys, prompt, story.image, true);
+      const res = await callGemini(sys, prompt, story.image, true);
+      if (!res.ok) return;
+
       let data = null;
-      if (raw) { try { data = JSON.parse(raw); } catch (e) {} }
-      if (!data) {
-        data = {
-          ayatoLikes: true,
-          hinaLikes: true,
-          responderId: 'ayato',
-          dmReply: 'Ten cuidado con la lluvia al regresar. No olvides abrigarte.'
-        };
-      }
+      try { data = JSON.parse(res.text); } catch (e) { return; }
 
       const targetStory = state.stories.find(s => s.id === story.id);
       if (targetStory) {
@@ -1652,14 +1663,15 @@ Responde SIEMPRE en JSON válido: {"ayatoLikes": true, "hinaLikes": true, "respo
 Contexto actual: ${buildWorldContextSummary()}
 Genera una historia corta de Instagram (máximo 90 caracteres) y opcionalmente una canción. Responde en JSON: {"text":"...", "location":"...", "musicTitle":"...", "musicArtist":"..."}`;
 
-      const raw = await callGemini(sys, 'Crea una historia nueva para tu perfil ahora mismo.', null, true);
-      let data = null;
-      if (raw) { try { data = JSON.parse(raw); } catch (e) {} }
-      if (!data) {
-        data = chosen.id === 'ayato'
-          ? { text: 'Tarde gris sobre la biblioteca central.', location: 'Campus Tokio', musicTitle: 'Arne', musicArtist: 'Haruka Nakamura' }
-          : { text: '¡Necesito un café dulce urgente! ☕✨', location: 'Tokio', musicTitle: 'Porcelain', musicArtist: 'Ichiko Aoba' };
+      const res = await callGemini(sys, 'Crea una historia nueva para tu perfil ahora mismo.', null, true);
+      btn.textContent = '✨ Historia IA';
+      if (!res.ok) {
+        showToast(chosen.avatar, 'Error de IA', res.error);
+        return;
       }
+
+      let data = null;
+      try { data = JSON.parse(res.text); } catch (e) { return; }
 
       const themes = ['cafe', 'train', 'library', 'lab', 'sweets'];
       state.stories.unshift({
@@ -1679,7 +1691,6 @@ Genera una historia corta de Instagram (máximo 90 caracteres) y opcionalmente u
         likedBy: []
       });
       saveState();
-      btn.textContent = '✨ Historia IA';
       renderStoriesTray();
       openStoryViewer(chosen.id);
     }
@@ -1838,9 +1849,9 @@ Genera una historia corta de Instagram (máximo 90 caracteres) y opcionalmente u
         const sys = `Eres ${responder.name} (${responder.handle}). ${responder.personality}
 Contexto actual: ${buildWorldContextSummary()}
 Responde con un comentario breve (1 oración) al comentario de Moka Momose en esta publicación de Instagram.`;
-        const reply = await callGemini(sys, `Publicación: "${post.caption}". Moka comentó: "${txt}".`);
-        if (reply) {
-          post.comments.push({ id: 'c-' + (Date.now() + 1), authorId: responder.id, text: reply.replace(/^["']|["']$/g, ''), timestamp: 'Ahora' });
+        const res = await callGemini(sys, `Publicación: "${post.caption}". Moka comentó: "${txt}".`);
+        if (res.ok) {
+          post.comments.push({ id: 'c-' + (Date.now() + 1), authorId: responder.id, text: res.text.replace(/^["']|["']$/g, ''), timestamp: 'Ahora' });
           saveState();
           renderFeed();
         }
@@ -1947,18 +1958,11 @@ Responde con un comentario breve (1 oración) al comentario de Moka Momose en es
       const profilesDesc = responders.map(r => `- ${r.id} (${r.name}, ${r.handle}): ${r.personality}`).join('\n');
       const sys = `Eres el motor de comentarios de Instagram en Tokio. Analiza la foto y el pie de foto, y genera reacciones realistas de:\n${profilesDesc}\nContexto: ${buildWorldContextSummary()}\nResponde SIEMPRE en JSON válido: {"likes":["ayato","hina"], "comments":[{"authorId":"hina","text":"..."}]}`;
 
-      const raw = await callGemini(sys, `Autor: ${state.characters[post.authorId]?.name}. Pie de foto: "${post.caption}".`, post.image, true);
+      const res = await callGemini(sys, `Autor: ${state.characters[post.authorId]?.name}. Pie de foto: "${post.caption}".`, post.image, true);
+      if (!res.ok) return;
+
       let data = null;
-      if (raw) { try { data = JSON.parse(raw); } catch (e) {} }
-      if (!data) {
-        data = {
-          likes: ['ayato', 'hina'],
-          comments: [
-            { authorId: 'hina', text: '¡Qué estética tan bonita! ✨' },
-            { authorId: 'ayato', text: 'Buen encuadre. No te quedes hasta muy tarde afuera.' }
-          ]
-        };
-      }
+      try { data = JSON.parse(res.text); } catch (e) { return; }
 
       const target = state.posts.find(p => p.id === post.id);
       if (!target) return;
@@ -1985,14 +1989,15 @@ Responde con un comentario breve (1 oración) al comentario de Moka Momose en es
 Contexto: ${buildWorldContextSummary()}
 Publica un nuevo post en Instagram. Responde en JSON: {"caption":"...","location":"...","theme":"cafe|lab|train|library|sweets"}`;
 
-      const raw = await callGemini(sys, 'Crea una publicación nueva con foto y texto breve.', null, true);
-      let data = null;
-      if (raw) { try { data = JSON.parse(raw); } catch (e) {} }
-      if (!data) {
-        data = author.id === 'ayato'
-          ? { caption: 'Notas de laboratorio antes de volver a casa.', location: 'Facultad de Ciencias', theme: 'lab' }
-          : { caption: 'Tarde perfecta para algo dulce después de clases 🍰✨', location: 'Shibuya, Tokio', theme: 'sweets' };
+      const res = await callGemini(sys, 'Crea una publicación nueva con foto y texto breve.', null, true);
+      btn.innerHTML = '<span>✨</span><span>Simular campus</span>';
+      if (!res.ok) {
+        showToast(author.avatar, 'Error de IA', res.error);
+        return;
       }
+
+      let data = null;
+      try { data = JSON.parse(res.text); } catch (e) { return; }
 
       state.posts.unshift({
         id: 'post-' + Date.now(),
@@ -2009,7 +2014,6 @@ Publica un nuevo post en Instagram. Responde en JSON: {"caption":"...","location
       });
 
       saveState();
-      btn.innerHTML = '<span>✨</span><span>Simular campus</span>';
       renderFeed();
     }
 
@@ -2018,15 +2022,15 @@ Publica un nuevo post en Instagram. Responde en JSON: {"caption":"...","location
       btn.innerHTML = '<span>⏳</span><span>Investigando...</span>';
       const sys = `Eres la cuenta anónima "Confesiones Campus Tokio" (@tokio_campus). Publicas rumores en formato "Confesión #..." inspirados en el campus (llamando a Ayato "el príncipe de hielo de Ciencias" y a Moka "la chica pálida de cabello largo de Humanidades"). Responde en JSON: {"caption":"Confesión #...","hinaComment":"comentario curioso de Hina con emojis"}`;
 
-      const raw = await callGemini(sys, `Eventos recientes:\n${buildWorldContextSummary()}\nCrea un rumor universitario.`, null, true);
-      let data = null;
-      if (raw) { try { data = JSON.parse(raw); } catch (e) {} }
-      if (!data) {
-        data = {
-          caption: 'Confesión #429: Dicen que vieron al «príncipe de hielo» de Ciencias cerca de la cafetería Komorebi mirando hacia la mesa de una chica de Humanidades de cabello larguísimo.',
-          hinaComment: '¿Cómo que mi hermano salió del laboratorio a mediodía?! 👀✨'
-        };
+      const res = await callGemini(sys, `Eventos recientes:\n${buildWorldContextSummary()}\nCrea un rumor universitario.`, null, true);
+      btn.innerHTML = '<span>👁️</span><span>Rumor del campus</span>';
+      if (!res.ok) {
+        showToast(state.characters.campus.avatar, 'Error de IA', res.error);
+        return;
       }
+
+      let data = null;
+      try { data = JSON.parse(res.text); } catch (e) { return; }
 
       state.posts.unshift({
         id: 'post-' + Date.now(),
@@ -2043,7 +2047,6 @@ Publica un nuevo post en Instagram. Responde en JSON: {"caption":"...","location
       });
 
       saveState();
-      btn.innerHTML = '<span>👁️</span><span>Rumor del campus</span>';
       renderFeed();
     }
 
@@ -2117,9 +2120,9 @@ Publica un nuevo post en Instagram. Responde en JSON: {"caption":"...","location
       const sys = `Eres Ayato Fushimi (${ayato.handle}). ${ayato.personality}
 Contexto: ${buildWorldContextSummary()}
 Moka puso una Nota de 24 horas en Instagram. Responde con un DM breve y sobrio.`;
-      const reply = await callGemini(sys, `Nota de Moka: "${text}"${music ? ` | Canción: "${music}"` : ''}.`);
-      if (reply) {
-        pushDM('ayato', { id: 'dm-' + Date.now(), senderId: 'ayato', text: reply, timestamp: state.clock });
+      const res = await callGemini(sys, `Nota de Moka: "${text}"${music ? ` | Canción: "${music}"` : ''}.`);
+      if (res.ok) {
+        pushDM('ayato', { id: 'dm-' + Date.now(), senderId: 'ayato', text: res.text, timestamp: state.clock });
       }
     }
 
@@ -2243,12 +2246,13 @@ Historial reciente de este chat:
 ${history}
 Responde como ${char.name} en un DM natural.`;
 
-      const reply = await callGemini(sys, userText || 'Moka te envió esta foto.', imgData);
-      const fallback = targetId === 'ayato'
-        ? 'Entendido. Avísame si necesitas algo más antes de tu parcial.'
-        : '¡Ay, qué lindo! Cuéntame más ✨';
+      const res = await callGemini(sys, userText || 'Moka te envió esta foto.', imgData);
+      if (!res.ok) {
+        showToast(char.avatar, 'Error de IA en DM', res.error, () => openModal('modal-api'));
+        return;
+      }
 
-      pushDM(targetId, { id: 'dm-' + Date.now(), senderId: targetId, text: reply || fallback, timestamp: state.clock });
+      pushDM(targetId, { id: 'dm-' + Date.now(), senderId: targetId, text: res.text, timestamp: state.clock });
     }
 
     function editLastDM() {
@@ -2519,6 +2523,14 @@ Responde como ${char.name} en un DM natural.`;
             </div>
           `;
         }
+        if (m.type === 'system_error') {
+          return `
+            <div class="mx-auto max-w-xl px-3.5 py-2.5 rounded-xl bg-rose-950/75 border border-rose-700/70 text-xs text-rose-200 flex items-center justify-between gap-2">
+              <span>⚠️ ${m.text}</span>
+              <button type="button" onclick="openModal('modal-api')" class="px-2.5 py-1 rounded-lg bg-rose-700 hover:bg-rose-600 text-white text-[11px] font-semibold shrink-0">Revisar API</button>
+            </div>
+          `;
+        }
         if (m.type === 'user') {
           if (m.isThought) {
             return `
@@ -2683,6 +2695,7 @@ Responde como ${char.name} en un DM natural.`;
       if (!text) return;
 
       input.value = '';
+      state.storyMessages = state.storyMessages.filter(m => m.type !== 'system_error');
       state.storyMessages.push({ id: 'sm-' + Date.now(), type: 'user', isThought: worldInputMode === 'thought', text });
       advanceClock(4);
       saveState();
@@ -2697,24 +2710,42 @@ Responde como ${char.name} en un DM natural.`;
 
       const moka = state.characters.moka;
       const ayato = state.characters.ayato;
+      const activeOCs = Object.values(state.characters)
+        .filter(c => !['moka', 'ayato', 'campus'].includes(c.id))
+        .map(c => `- ${c.name} (${c.handle}): ${c.personality}`)
+        .join('\n');
+
       const sys = `Eres el narrador literario de una historia slice-of-life universitaria ambientada en Tokio en noviembre.
 Personaje principal ({{user}}): ${moka.personality}
 Personaje co-protagonista: ${ayato.personality}
+Otros personajes del campus disponibles si la escena los involucra:
+${activeOCs}
 
-REGLAS ESTRICTAS:
-1. Escribe siempre en tercera persona con un ritmo pausado, elegante y realista.
-2. Rodea TODAS las narraciones y acciones con un asterisco simple (*acción*), y escribe todos los diálogos hablados comenzando con guion largo (—diálogo), sin comillas ni emojis.
-3. Si el último turno de Moka está marcado como [Pensamiento privado de Moka - NO audible por otros], Ayato NO puede leer su mente; solo nota su expresión serena o su silencio.
+REGLAS ESTRICTAS DE NARRACIÓN Y PENSAMIENTO:
+1. Escribe siempre en tercera persona con un ritmo pausado, sensorial, psicológico y realista, avanzando la trama de forma orgánica y distinta en cada turno.
+2. Rodea TODAS las narraciones, acciones, microexpresiones y lenguaje corporal con asterisco simple (*acción*), y escribe todos los diálogos hablados comenzando con guion largo (—diálogo), sin comillas ni emojis.
+3. Si el último turno de Moka está marcado como [Pensamiento privado de Moka - NO audible por otros], Ayato y los demás personajes NO pueden leer su mente; solo perciben su silencio, su mirada o su expresión serena, mostrando también las observaciones internas y sutilezas de Ayato a través de sus actos y pausas.
 4. Ayato avanza lentamente, respeta los silencios y límites de Moka, y jamás describe acciones o diálogos por Moka.
-5. Hora actual: ${state.clock} hrs | Clima: ${state.weather} | Lugar: ${state.currentScene}.`;
+5. Hora actual: ${state.clock} hrs | Clima: ${state.weather} | Lugar actual: ${state.currentScene}.`;
 
-      const reply = await callGemini(sys, `Historial y estado actual:\n${buildWorldContextSummary()}\n\nContinúa la narración ahora (2 a 3 párrafos).`);
-      const fallback = `*El aire fresco de noviembre envuelve ${state.currentScene} mientras el cielo gris de Tokio amenaza con volver a llover. Ayato Fushimi sostiene con serenidad su vaso de café negro y observa a Moka con esa calma analítica y respetuosa que lo caracteriza, manteniendo una distancia prudente para no invadir su espacio.*\n\n—No hace falta que te apresures —*dice con su voz grave, baja y pausada de siempre*—. Si tienes examen pronto, concéntrate en eso primero.`;
+      const res = await callGemini(sys, `Historial y estado actual de la escena:\n${buildWorldContextSummary()}\n\nContinúa la narración desarrollando lo que acaba de hacer, decir o pensar Moka (2 a 3 párrafos envolventes y nunca repetitivos).`);
 
-      state.storyMessages.push({ id: 'sm-' + Date.now(), type: 'narrator', text: reply || fallback });
-      saveState();
       btn.textContent = 'Continuar';
       btn.disabled = false;
+
+      if (!res.ok) {
+        state.storyMessages.push({
+          id: 'err-' + Date.now(),
+          type: 'system_error',
+          text: res.error
+        });
+        saveState();
+        renderWorldView();
+        return;
+      }
+
+      state.storyMessages.push({ id: 'sm-' + Date.now(), type: 'narrator', text: res.text });
+      saveState();
       renderWorldView();
     }
 
@@ -2748,7 +2779,7 @@ REGLAS ESTRICTAS:
     function openNovelModal() {
       const box = document.getElementById('novel-content-box');
       let chapterNum = 1;
-      box.innerHTML = state.storyMessages.map(m => {
+      box.innerHTML = state.storyMessages.filter(m => m.type !== 'system_error').map(m => {
         if (m.type === 'scene_notice') {
           return `<div class="pt-6 pb-2 border-b border-zinc-800 text-indigo-300 font-sans text-xs uppercase tracking-widest">Capítulo ${chapterNum++} — ${m.location} (${m.clock} hrs)</div>`;
         }
@@ -2764,7 +2795,7 @@ REGLAS ESTRICTAS:
     }
 
     function downloadNovelTxt() {
-      const lines = state.storyMessages.map(m => {
+      const lines = state.storyMessages.filter(m => m.type !== 'system_error').map(m => {
         if (m.type === 'scene_notice') return `\n=== ${m.location} (${m.clock} hrs • ${m.weather}) ===\n`;
         if (m.type === 'sync_notice') return `[${m.text}]`;
         if (m.isThought) return `(Pensamiento de Moka): ${m.text}`;
@@ -2780,9 +2811,27 @@ REGLAS ESTRICTAS:
 
     // ==================== API KEY, BACKUPS & MODALS ====================
     function updateApiIndicator() {
+      const hasKey = Boolean((state.apiKey || '').trim());
       const dot = document.getElementById('api-dot');
-      dot.className = state.apiKey ? 'w-2 h-2 rounded-full bg-emerald-400' : 'w-2 h-2 rounded-full bg-amber-500';
+      dot.className = hasKey ? 'w-2 h-2 rounded-full bg-emerald-400' : 'w-2 h-2 rounded-full bg-amber-500';
       document.getElementById('api-key-input').value = state.apiKey || '';
+      document.getElementById('quick-api-input').value = state.apiKey || '';
+      document.getElementById('api-missing-banner').classList.toggle('hidden', hasKey);
+    }
+
+    async function saveQuickApiKey() {
+      const val = document.getElementById('quick-api-input').value.trim();
+      if (!val) return;
+      state.apiKey = val;
+      saveState();
+      updateApiIndicator();
+      showToast(state.characters.ayato.avatar, 'Clave API activada', 'Probando conexión con Gemini...');
+      const res = await callGemini('Responde únicamente: OK', 'Test');
+      if (res.ok) {
+        showToast(state.characters.ayato.avatar, 'IA conectada', 'Ya puedes continuar la historia y chatear.');
+      } else {
+        showToast(state.characters.ayato.avatar, 'Clave inválida o bloqueada', res.error, () => openModal('modal-api'));
+      }
     }
 
     function saveApiKey() {
@@ -2795,10 +2844,20 @@ REGLAS ESTRICTAS:
 
     async function testApiKey() {
       const btn = document.getElementById('btn-test-api');
+      const msg = document.getElementById('api-test-msg');
       state.apiKey = document.getElementById('api-key-input').value.trim();
       btn.textContent = 'Probando...';
+      msg.textContent = '';
       const res = await callGemini('Responde únicamente: OK', 'Test');
-      btn.textContent = res ? '✅ Conectada' : '❌ Error de clave';
+      if (res.ok) {
+        btn.textContent = '✅ Conectada';
+        msg.textContent = 'Conexión exitosa con Gemini.';
+        msg.className = 'text-[11px] text-emerald-400';
+      } else {
+        btn.textContent = '❌ Error';
+        msg.textContent = res.error;
+        msg.className = 'text-[11px] text-rose-400';
+      }
       saveState();
       updateApiIndicator();
     }
@@ -2830,7 +2889,7 @@ REGLAS ESTRICTAS:
 
     function resetAllData() {
       if (!confirm('¿Seguro que quieres reiniciar la historia, publicaciones y chats al estado inicial?')) return;
-      [STORAGE_KEY, 'kizuna_tokio_v5', 'kizuna_tokio_v4', 'kizuna_tokio_v3'].forEach(k => localStorage.removeItem(k));
+      [STORAGE_KEY, 'kizuna_tokio_v6', 'kizuna_tokio_v5', 'kizuna_tokio_v4', 'kizuna_tokio_v3'].forEach(k => localStorage.removeItem(k));
       location.reload();
     }
 
@@ -2852,7 +2911,7 @@ REGLAS ESTRICTAS:
       toastAction = onClick;
       toast.classList.remove('hidden');
       clearTimeout(window._toastTimer);
-      window._toastTimer = setTimeout(() => toast.classList.add('hidden'), 4800);
+      window._toastTimer = setTimeout(() => toast.classList.add('hidden'), 5500);
     }
 
     function handleToastClick() {
@@ -2869,10 +2928,11 @@ REGLAS ESTRICTAS:
         renderFeed();
         renderWorldView();
       } catch (err) {
-        console.error('Error al inicializar, restaurando estado limpio:', err);
+        console.error('Error al inicializar:', err);
         state = buildDefaultState();
         saveState();
         document.getElementById('nav-moka-avatar').src = state.characters.moka.avatar;
+        updateApiIndicator();
         setViewMode('split');
         renderFeed();
         renderWorldView();
